@@ -1,7 +1,5 @@
 FROM quay.io/armosec/kubescape
 
-WORKDIR /kubescape
-
-COPY entrypoint.sh /kubescape/entrypoint.sh
-
-ENTRYPOINT ["/kubescape/entrypoint.sh"]
+ADD entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
