@@ -5,7 +5,20 @@ description: Run Kubescape scan
 inputs:
   args:
     description: |
-      Arguments to be passed to kubescape scan
+      Arguments to be passed to kubescape scan. The following
+      arguments are supported - 
+      -t, --fail-threshold - Failure threshold is the percent 
+                             above which the command fails and 
+                             returns exit code 1 (default 100)
+      -f, --format - Output format. Supported formats: 
+                    "pretty-printer"/"json"/"junit"/"prometheus"
+                    (default "pretty-printer")
+      -o, --output - Output file. Print output to file and not stdout
+      -s, --silent - Silent progress messages
+      --verbose - Display all of the input resources and not only 
+                  failed resources
+      --logger - Logger level. Supported: debug/info/success/warning/
+                 error/fatal (default "info")
     required: false
   files:
     description: |
@@ -13,11 +26,15 @@ inputs:
     required: true
   framework:
     description: |
-      List of all frameworks to scan
+      List of all frameworks to scan. Run kubescape list frameworks with 
+      the Kubescape CLI to get a list of all frameworks. Either frameworks 
+      have to be specified or controls.
     required: false
   control:
     description: |
-      List of all controls to scan
+      List of all controls to scan. Run kubescape list controls with the 
+      Kubescape CLI to get a list of all controls. Either frameworks 
+      have to be specified or controls.
     required: false
 runs:
   using: docker
