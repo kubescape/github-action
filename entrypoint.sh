@@ -18,6 +18,7 @@ if [ ! -z "$INPUT_CONTROL" ]; then
         CONTROLS="$CONTROLS\"$var\","
     done
     CONTROLS=$(echo "${CONTROLS%?}")
+    echo $CONTROLS
 fi
 
 FRAMEWORK_CMD=$([ ! -z "$INPUT_FRAMEWORK" ] && echo "framework $INPUT_FRAMEWORK" || echo "")
