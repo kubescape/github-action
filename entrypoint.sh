@@ -2,16 +2,28 @@
 
 set -e
 
-echo Framework
-echo $INPUT_FRAMEWORK
-
 if [ ! -z "$INPUT_FRAMEWORK" ] && [ ! -z "$INPUT_CONTROL" ]; then
 echo "Framework and Control is specified. Please specify either one of them or neither"
 exit 1
 fi
 
-FRAMEWORK_CMD=$([ ! -z "$INPUT_FRAMEWORK" ] && echo "framework $INPUT_FRAMEWORK" || echo "")
-CONTROL_CMD=$([ ! -z "$INPUT_CONTROL" ] && echo "control $INPUT_CONTROL" || echo "")
+# Split the controls by comma and concatenate with quotes around each control
+if [ ! -z "$INPUT_CONTROL" ]; then
+    CONTROLS=""
+    set -f; IFS=','
+    set -- $INPUT_CONTROL
+    set +f; unset IFS
+    for var in "$@"
+    do
+        CONTROLS="$CONTROLS\"$var\","
+    done
+    CONTROLS=$(echo "${CONTROLS%?}")
+fi
 
-kubescape scan $FRAMEWORK_CMD $CONTROL_CMD $INPUT_FILES $INPUT_ARGS
+FRAMEWORK_CMD=$([ ! -z "$INPUT_FRAMEWORK" ] && echo "framework $INPUT_FRAMEWORK" || echo "")
+CONTROL_CMD=$([ ! -z "$INPUT_CONTROL" ] && echo control $CONTROLS || echo "")
+
+COMMAND="kubescape scan $FRAMEWORK_CMD $CONTROL_CMD $INPUT_FILES $INPUT_ARGS"
+
+eval $COMMAND
 
