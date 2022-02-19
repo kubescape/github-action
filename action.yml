@@ -1,0 +1,26 @@
+name: Kubescape
+description: Run Kubescape scan
+# author:
+
+inputs:
+  args:
+    description: |
+      Arguments to be passed to kubescape scan
+    required: false
+  files:
+    description: |
+      Path to the configuration yaml to scan
+    required: true
+  framework:
+    description: |
+      List of all frameworks to scan
+    required: false
+  control:
+    description: |
+      List of all controls to scan
+    required: false
+runs:
+  using: docker
+  image: Dockerfile
+  args:
+  - ${{ inputs.args }}
