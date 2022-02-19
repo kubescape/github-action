@@ -2,6 +2,9 @@
 
 set -e
 
+echo Framework
+echo $INPUT_FRAMEWORK
+
 if [ ! -z "$INPUT_FRAMEWORK" ] && [ ! -z "$INPUT_CONTROL" ]; then
 echo "Framework and Control is specified. Please specify either one of them or neither"
 exit 1
