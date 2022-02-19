@@ -13,9 +13,10 @@ if [ ! -z "$INPUT_CONTROL" ]; then
     set -f; IFS=','
     set -- $INPUT_CONTROL
     set +f; unset IFS
-    for var in "$@"
+    for control in "$@"
     do
-        CONTROLS="$CONTROLS\"$var\","
+        control=$(echo $control | xargs) # Remove leading/trailing whitespaces
+        CONTROLS="$CONTROLS\"$control\","
     done
     CONTROLS=$(echo "${CONTROLS%?}")
     echo $CONTROLS
