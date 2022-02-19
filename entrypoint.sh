@@ -2,10 +2,13 @@
 
 set -e
 
-echo "INPUT_ARGS $INPUT_ARGS"
-echo "INPUT_FILES $INPUT_FILES\n"
-echo "INPUT_CONTROL $INPUT_CONTROL\n"
-
-if [[ ! -z "$INPUT_FRAMEWORK" ]]; then
-echo "Framework is set to $INPUT_FRAMEWORK"
+if [ ! -z "$INPUT_FRAMEWORK" ] && [ ! -z "$INPUT_CONTROL" ]; then
+echo "Framework and Control is specified. Please specify either one of them or neither"
+exit 1
 fi
+
+FRAMEWORK_CMD=$([ ! -z "$INPUT_FRAMEWORK" ] && echo "framework $INPUT_FRAMEWORK" || echo "")
+CONTROL_CMD=$([ ! -z "$INPUT_CONTROL" ] && echo "control $INPUT_CONTROL" || echo "")
+
+kubescape scan $FRAMEWORK_CMD $CONTROL_CMD $INPUT_FILES $INPUT_ARGS
+
