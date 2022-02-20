@@ -7,9 +7,6 @@ inputs:
     description: |
       Arguments to be passed to kubescape scan. The following
       arguments are supported - 
-      -t, --fail-threshold - Failure threshold is the percent 
-                             above which the command fails and 
-                             returns exit code 1 (default 100)
       -f, --format - Output format. Supported formats: 
                     "pretty-printer"/"json"/"junit"/"prometheus"
                     (default "pretty-printer")
@@ -19,6 +16,12 @@ inputs:
                   failed resources
       --logger - Logger level. Supported: debug/info/success/warning/
                  error/fatal (default "info")
+    required: false
+  threshold:
+    description: |
+      Failure threshold is the percent above which the command fails and 
+      returns exit code 1 (default 0 i.e, action fails if any control fails)
+    default: 0
     required: false
   files:
     description: |

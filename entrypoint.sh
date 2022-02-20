@@ -24,7 +24,7 @@ fi
 FRAMEWORK_CMD=$([ ! -z "$INPUT_FRAMEWORK" ] && echo "framework $INPUT_FRAMEWORK" || echo "")
 CONTROL_CMD=$([ ! -z "$INPUT_CONTROL" ] && echo control $CONTROLS || echo "")
 
-COMMAND="kubescape scan $FRAMEWORK_CMD $CONTROL_CMD $INPUT_FILES $INPUT_ARGS"
+COMMAND="kubescape scan $FRAMEWORK_CMD $CONTROL_CMD $INPUT_FILES --fail-threshold $INPUT_THRESHOLD $INPUT_ARGS"
 
 eval $COMMAND
 
