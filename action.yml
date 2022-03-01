@@ -11,6 +11,7 @@ inputs:
                     "pretty-printer"/"json"/"junit"/"prometheus"
                     (default "pretty-printer")
       -o, --output - Output file. Print output to file and not stdout
+      --exceptions - Path to an exceptions object file
       -s, --silent - Silent progress messages
       --verbose - Display all of the input resources and not only 
                   failed resources
