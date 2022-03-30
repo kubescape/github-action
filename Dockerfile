@@ -1,6 +1,6 @@
 FROM quay.io/armosec/kubescape
 
-USER ks
+USER root
 ADD entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
