@@ -23,8 +23,9 @@ fi
 
 FRAMEWORK_CMD=$([ ! -z "$INPUT_FRAMEWORK" ] && echo "framework $INPUT_FRAMEWORK" || echo "")
 CONTROL_CMD=$([ ! -z "$INPUT_CONTROL" ] && echo control $CONTROLS || echo "")
+ACCOUNT_ID=$([ ! -z "$ACCOUNT_ID" ] && echo control $ACCOUNT_ID || echo "")
 
-COMMAND="kubescape scan $FRAMEWORK_CMD $CONTROL_CMD $INPUT_FILES --fail-threshold $INPUT_THRESHOLD $INPUT_ARGS"
+COMMAND="kubescape scan $FRAMEWORK_CMD $CONTROL_CMD $INPUT_FILES --fail-threshold $INPUT_THRESHOLD $INPUT_ARGS --account $ACCOUNT_ID --verbose"
 
 eval $COMMAND
 

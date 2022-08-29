@@ -13,8 +13,6 @@ inputs:
       -o, --output - Output file. Print output to file and not stdout
       --exceptions - Path to an exceptions object file
       -s, --silent - Silent progress messages
-      --verbose - Display all of the input resources and not only 
-                  failed resources
       --logger - Logger level. Supported: debug/info/success/warning/
                  error/fatal (default "info")
     required: false
@@ -22,12 +20,17 @@ inputs:
     description: |
       Failure threshold is the percent above which the command fails and 
       returns exit code 1 (default 0 i.e, action fails if any control fails)
-    default: 0
+    default: "0"
     required: false
   files:
     description: |
       Path to the configuration yaml to scan
-    required: true
+    required: false
+    default: "."
+  account:
+    description: |
+      Kubescape cloud account ID
+    required: false
   framework:
     description: |
       List of all frameworks to scan. Run kubescape list frameworks with 
