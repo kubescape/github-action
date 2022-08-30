@@ -22,6 +22,6 @@ jobs:
       - uses: avinashupadhya99/kubescape-action@main
         with:
           threshold: "50"
-          account: ${{ github.KUBESCAPE_ACCOUNT }}
+          # account: ${{ github.KUBESCAPE_ACCOUNT }}
           
 
