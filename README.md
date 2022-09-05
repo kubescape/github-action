@@ -117,6 +117,22 @@ jobs:
           name: kubescape-scan-report
           path: results.xml
 ```
+- Exceptions
+
+```yaml
+name: KubeScape-Exceptions
+on: push
+
+jobs:
+  kubescape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: action/checkout@master
+      - uses: orrgato/Kubescape-github-action@add-exception
+        with:
+          files: "kubernetes-prod/*.yaml"
+          exceptions: exceptions/exclude-NSA-framework.json
+```
 
 ## License
 
