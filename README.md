@@ -9,7 +9,7 @@ Add the following step to your workflow configuration:
 ```yaml
 steps:
   - uses: actions/checkout@v2 
-  - uses: avinashupadhya99/kubescape-action@main
+  - uses: kubescape/github-action@main
     with:
       files: kubernetes/*.yaml
 ```
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - uses: avinashupadhya99/kubescape-action@main
+      - uses: kubescape/github-action@main
         with:
           files: "kubernetes-prod/*.yaml"
 ```
@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - uses: avinashupadhya99/kubescape-action@main
+      - uses: kubescape/github-action@main
         with:
           args: "--fail-threshold 90"
           files: "kubernetes-prod/*.yaml"
@@ -70,7 +70,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - uses: avinashupadhya99/kubescape-action@main
+      - uses: kubescape/github-action@main
         with:
           files: "kubernetes-prod/*.yaml"
           framework: |
@@ -88,7 +88,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - uses: avinashupadhya99/kubescape-action@main
+      - uses: kubescape/github-action@main
         with:
           files: "kubernetes-prod/*.yaml"
           control: |
@@ -106,7 +106,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - uses: avinashupadhya99/kubescape-action@main
+      - uses: kubescape/github-action@main
         with:
           args: "--format junit --output results.xml"
           files: "kubernetes-prod/*.yaml"
@@ -128,7 +128,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: action/checkout@master
-      - uses: orrgato/Kubescape-github-action@add-exception
+      - uses: kubescape/github-action@main
         with:
           files: "kubernetes-prod/*.yaml"
           exceptions: exceptions/exclude-NSA-framework.json
