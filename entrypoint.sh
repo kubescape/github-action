@@ -26,5 +26,9 @@ CONTROL_CMD=$([ ! -z "$INPUT_CONTROL" ] && echo control $CONTROLS || echo "")
 
 COMMAND="kubescape scan $FRAMEWORK_CMD $CONTROL_CMD $INPUT_FILES --fail-threshold $INPUT_THRESHOLD $INPUT_ARGS"
 
+if [ ! -z "$INPUT_EXCEPTIONS" ]; then
+COMMAND="${COMMAND} --exceptions ${INPUT_EXCEPTIONS}"
+fi
+
 eval $COMMAND
 

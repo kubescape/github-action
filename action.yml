@@ -11,7 +11,6 @@ inputs:
                     "pretty-printer"/"json"/"junit"/"prometheus"
                     (default "pretty-printer")
       -o, --output - Output file. Print output to file and not stdout
-      --exceptions - Path to an exceptions object file
       -s, --silent - Silent progress messages
       --verbose - Display all of the input resources and not only 
                   failed resources
@@ -39,6 +38,10 @@ inputs:
       List of all controls to scan. Run kubescape list controls with the 
       Kubescape CLI to get a list of all controls. Either frameworks 
       have to be specified or controls.
+    required: false
+  exceptions:
+    description: |
+      Path to the json file containing exceptions.
     required: false
 runs:
   using: docker

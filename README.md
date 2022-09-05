@@ -9,7 +9,7 @@ Add the following step to your workflow configuration:
 ```yaml
 steps:
   - uses: actions/checkout@v2 
-  - uses: avinashupadhya99/kubescape-action@main
+  - uses: kubescape/github-action@main
     with:
       files: kubernetes/*.yaml
 ```
@@ -22,8 +22,8 @@ steps:
 | threshold | Failure threshold is the percent above which the command fails and returns exit code 1 (default 0 i.e, action fails if any control fails) | No (default 0) |
 | framework | The security framework(s) to scan the files against. Multiple frameworks can be specified separated by a comma with no spaces. Example - `nsa,devopsbest`. Run `kubescape list frameworks` with the [Kubescape CLI](https://hub.armo.cloud/docs/installing-kubescape) to get a list of all frameworks. Either frameworks have to be specified or controls. | No |
 | control | The security control(s) to scan the files against. Multiple controls can be specified separated by a comma with no spaces. Example - `Configured liveness probe,Pods in default namespace`. Run `kubescape list controls` with the [Kubescape CLI](https://hub.armo.cloud/docs/installing-kubescape) to get a list of all controls. The complete control name can be specified or the ID such as `C-0001` can be specified. Either controls have to be specified or frameworks. | No |
-| args | Additional arguments to the Kubescape CLI. The following arguments are supported - <ul><li>` -f, --format` - Output format. Supported formats: "pretty-printer"/"json"/"junit"/"prometheus" (default "pretty-printer")</li><li>`-o, --output` - Output file. Print output to file and not stdout</li><li>`--exceptions` - Provide path to an [exception](https://hub.armo.cloud/docs/exceptions) object.</li><li>` -s, --silent` - Silent progress messages</li><li>`--verbose` - Display all of the input resources and not only failed resources</li><li>`--logger` - Logger level. Supported: debug/info/success/warning/error/fatal (default "info")</li></ul> | No |
-
+| args | Additional arguments to the Kubescape CLI. The following arguments are supported - <ul><li>` -f, --format` - Output format. Supported formats: "pretty-printer"/"json"/"junit"/"prometheus" (default "pretty-printer")</li><li>`-o, --output` - Output file. Print output to file and not stdout</li><li>` -s, --silent` - Silent progress messages</li><li>`--verbose` - Display all of the input resources and not only failed resources</li><li>`--logger` - Logger level. Supported: debug/info/success/warning/error/fatal (default "info")</li></ul> | No |
+| exceptions | The JSON file containing at least one resource and one policy. Refer [exceptions](https://hub.armo.cloud/docs/exceptions) docs for more info. Objects with exceptions will be presented as exclude and not fail. | No |
 ## Examples
 
 - Standard
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - uses: avinashupadhya99/kubescape-action@main
+      - uses: kubescape/github-action@main
         with:
           files: "kubernetes-prod/*.yaml"
 ```
@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - uses: avinashupadhya99/kubescape-action@main
+      - uses: kubescape/github-action@main
         with:
           args: "--fail-threshold 90"
           files: "kubernetes-prod/*.yaml"
@@ -70,7 +70,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - uses: avinashupadhya99/kubescape-action@main
+      - uses: kubescape/github-action@main
         with:
           files: "kubernetes-prod/*.yaml"
           framework: |
@@ -88,7 +88,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - uses: avinashupadhya99/kubescape-action@main
+      - uses: kubescape/github-action@main
         with:
           files: "kubernetes-prod/*.yaml"
           control: |
@@ -106,7 +106,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - uses: avinashupadhya99/kubescape-action@main
+      - uses: kubescape/github-action@main
         with:
           args: "--format junit --output results.xml"
           files: "kubernetes-prod/*.yaml"
@@ -116,6 +116,22 @@ jobs:
         with:
           name: kubescape-scan-report
           path: results.xml
+```
+- Exceptions
+
+```yaml
+name: KubeScape-Exceptions
+on: push
+
+jobs:
+  kubescape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: action/checkout@master
+      - uses: kubescape/github-action@main
+        with:
+          files: "kubernetes-prod/*.yaml"
+          exceptions: exceptions/exclude-NSA-framework.json
 ```
 
 ## License
