@@ -41,7 +41,7 @@ inputs:
     required: false
   exceptions:
     description: |
-      Link of the json file containing exceptions.
+      Path to the json file containing exceptions.
     required: false
 runs:
   using: docker
