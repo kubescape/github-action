@@ -3,6 +3,14 @@ description: Run Kubescape scan
 # author:
 
 inputs:
+  scanrepository:
+      description: |
+        yes or no input to scan the entire repository
+      required: true
+  accountGUID:
+    description: |
+      the github account id.
+    required: false
   args:
     description: |
       Arguments to be passed to kubescape scan. The following
@@ -26,7 +34,7 @@ inputs:
   files:
     description: |
       Path to the configuration yaml to scan
-    required: true
+    required: false
   framework:
     description: |
       List of all frameworks to scan. Run kubescape list frameworks with 
