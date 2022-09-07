@@ -3,7 +3,7 @@ description: Run Kubescape scan
 # author:
 
 inputs:
-  scanrepository:
+  scanRepository:
       description: |
         yes or no input to scan the entire repository
       required: true
