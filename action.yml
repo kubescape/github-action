@@ -5,11 +5,11 @@ description: Run Kubescape scan
 inputs:
   scanRepository:
       description: |
-        yes or no input to scan the entire repository
+        "yes" or "no" input to scan the entire repository
       required: true
   accountGUID:
     description: |
-      the github account id.
+      Kubescape account id. Mandatory when scanRepository is set to "yes"
     required: false
   args:
     description: |
@@ -33,7 +33,7 @@ inputs:
     required: false
   files:
     description: |
-      Path to the configuration yaml to scan
+      Path to the configuration yaml to scan. Mandatory when scanRepository is set to "no"
     required: false
   framework:
     description: |
