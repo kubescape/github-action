@@ -1,0 +1,21 @@
+<testsuites errors="0" disabled="0" failures="2" tests="2" time="" name="Kubescape Scanning" timestamp="2022-09-07 07:55:32.396104653 +0000 UTC">
+    <testsuite tests="3" name="resource-name" file="kubescape-action/example/kubernetes-manifests/adservice.yaml" disabled="0" errors="0" failures="2" hostname="" skipped="" time="">
+        <testcase name="control name 1" status="failed" time="" id="C-0078">
+            <failure message= "Remediation: You should enable all trusted repositories in the parameters of this control.&#xA;More details: https://hub.armosec.io/docs/c-0078&#xA;&#xA;control id: C-0001&#xA;conrol name: Forbidden Container Registries&#xA;Remediation: Limit the registries from which you pull container images from.&#xA;More details: https://hub.armosec.io/docs/c-0001&#xA;&#xA;" type="Control"></failure>
+        </testcase>
+        <testcase name="control name 2" status="failed" time="" id="C-0001">
+            <failure message= "Remediation: Limit the registries from which you pull container images from.&#xA;More details: https://hub.armosec.io/docs/c-0001&#xA;&#xA;" type="Control"></failure>
+        </testcase>
+        <testcase name="control name 3" status="passed" time="" id="C-0055">
+        </testcase>
+        
+    </testsuite>
+    <testsuite tests="2" name="resource-name" file="kubescape-action/example/kubernetes-manifests/frontend.yaml" disabled="0" errors="0" failures="2" hostname="" skipped="" time="">
+        <testcase name="control name 1" status="failed" time="" id="C-0079">
+            <failure message= "Remediation: You should enable all trusted repositories in the parameters of this control.&#xA;More details: https://hub.armosec.io/docs/c-0078&#xA;&#xA;control id: C-0001&#xA;conrol name: Forbidden Container Registries&#xA;Remediation: Limit the registries from which you pull container images from.&#xA;More details: https://hub.armosec.io/docs/c-0001&#xA;&#xA;" type="Control"></failure>
+        </testcase>
+        <testcase name="control name 1" status="passed" time="" id="C-0055">
+        </testcase>
+        
+    </testsuite>
+</testsuites>
