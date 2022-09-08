@@ -1,22 +1,10 @@
-<testsuites errors="0" disabled="0" failures="2" tests="2" time="" name="Kubescape Scanning" timestamp="2022-09-07 07:55:32.396104653 +0000 UTC">
-    <testsuite tests="3" name="resource-name" file="kubescape-action/example/kubernetes-manifests/adservice.yaml" disabled="0" errors="0" failures="2" hostname="" skipped="" time="">
-        <testcase name="control name 1" status="failed" time="" id="C-0078">
-            <failure message= "Remediation: You should enable all trusted repositories in the parameters of this control.&#xA;More details: https://hub.armosec.io/docs/c-0078&#xA;&#xA;control id: C-0001&#xA;conrol name: Forbidden Container Registries&#xA;Remediation: Limit the registries from which you pull container images from.&#xA;More details: https://hub.armosec.io/docs/c-0001&#xA;&#xA;" type="Control"></failure>
+<testsuites errors="0" disabled="0" failures="1" tests="1" time="" name="Kubescape Scanning">
+    <testsuite name="kubescape" disabled="0" errors="0" failures="1" hostname="" id="0" skipped="" time="" timestamp="2022-09-07 07:55:32.396104653 +0000 UTC">
+        <properties>
+            <property name="riskScore" value="100.00"></property>
+        </properties>
+        <testcase classcase="" status="failed" name="kubescape-action\example2\test.yaml" time="">
+            <failure message= "file: kubescape-action\example2\test.yaml&#xA;&#xA;control id: C-0078&#xA;conrol name: Images from allowed registry&#xA;Remediation: You should enable all trusted repositories in the parameters of this control.&#xA;More details: https://hub.armosec.io/docs/c-0078&#xA;&#xA;control id: C-0001&#xA;conrol name: Forbidden Container Registries&#xA;Remediation: Limit the registries from which you pull container images from.&#xA;More details: https://hub.armosec.io/docs/c-0001&#xA;&#xA;file: kubescape-action\example2\test.yaml&#xA;&#xA;control id: C-0001&#xA;conrol name: Forbidden Container Registries&#xA;Remediation: Limit the registries from which you pull container images from.&#xA;More details: https://hub.armosec.io/docs/c-0001&#xA;&#xA;" type="Control"></failure>
         </testcase>
-        <testcase name="control name 2" status="failed" time="" id="C-0001">
-            <failure message= "Remediation: Limit the registries from which you pull container images from.&#xA;More details: https://hub.armosec.io/docs/c-0001&#xA;&#xA;" type="Control"></failure>
-        </testcase>
-        <testcase name="control name 3" status="passed" time="" id="C-0055">
-        </testcase>
-        
-
-    </testsuite>
-    <testsuite tests="2" name="resource-name" file="kubescape-action/example/kubernetes-manifests/frontend.yaml" disabled="0" errors="0" failures="2" hostname="" skipped="" time="">
-        <testcase name="control name 111" status="failed" time="" id="C-0079">
-            <failure message= "Remediation: You should enable all trusted repositories in the parameters of this control.&#xA;More details: https://hub.armosec.io/docs/c-0078&#xA;&#xA;control id: C-0001&#xA;conrol name: Forbidden Container Registries&#xA;Remediation: Limit the registries from which you pull container images from.&#xA;More details: https://hub.armosec.io/docs/c-0001&#xA;&#xA;" type="Control"></failure>
-        </testcase>
-        <testcase name="control name 222" status="passed" time="" id="C-0055">
-        </testcase>
-        
     </testsuite>
 </testsuites>
