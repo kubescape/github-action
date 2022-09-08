@@ -9,12 +9,13 @@
         <testcase name="control name 3" status="passed" time="" id="C-0055">
         </testcase>
         
+
     </testsuite>
     <testsuite tests="2" name="resource-name" file="kubescape-action/example/kubernetes-manifests/frontend.yaml" disabled="0" errors="0" failures="2" hostname="" skipped="" time="">
-        <testcase name="control name 1" status="failed" time="" id="C-0079">
+        <testcase name="control name 111" status="failed" time="" id="C-0079">
             <failure message= "Remediation: You should enable all trusted repositories in the parameters of this control.&#xA;More details: https://hub.armosec.io/docs/c-0078&#xA;&#xA;control id: C-0001&#xA;conrol name: Forbidden Container Registries&#xA;Remediation: Limit the registries from which you pull container images from.&#xA;More details: https://hub.armosec.io/docs/c-0001&#xA;&#xA;" type="Control"></failure>
         </testcase>
-        <testcase name="control name 1" status="passed" time="" id="C-0055">
+        <testcase name="control name 222" status="passed" time="" id="C-0055">
         </testcase>
         
     </testsuite>
