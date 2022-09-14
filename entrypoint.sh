@@ -2,16 +2,16 @@
 
 set -e
 
-if [ ! -z "$INPUT_FRAMEWORK" ] && [ ! -z "$INPUT_CONTROL" ]; then
+if [ ! -z "$INPUT_FRAMEWORKS" ] && [ ! -z "$INPUT_CONTROLS" ]; then
 echo "Framework and Control is specified. Please specify either one of them or neither"
 exit 1
 fi
 
 # Split the controls by comma and concatenate with quotes around each control
-if [ ! -z "$INPUT_CONTROL" ]; then
+if [ ! -z "$INPUT_CONTROLS" ]; then
     CONTROLS=""
     set -f; IFS=','
-    set -- $INPUT_CONTROL
+    set -- $INPUT_CONTROLS
     set +f; unset IFS
     for control in "$@"
     do
@@ -21,14 +21,18 @@ if [ ! -z "$INPUT_CONTROL" ]; then
     CONTROLS=$(echo "${CONTROLS%?}")
 fi
 
-FRAMEWORK_CMD=$([ ! -z "$INPUT_FRAMEWORK" ] && echo "framework $INPUT_FRAMEWORK" || echo "")
-CONTROL_CMD=$([ ! -z "$INPUT_CONTROL" ] && echo control $CONTROLS || echo "")
+FRAMEWORKS_CMD=$([ ! -z "$INPUT_FRAMEWORKS" ] && echo "framework $INPUT_FRAMEWORKS" || echo "")
+CONTROLS_CMD=$([ ! -z "$INPUT_CONTROLS" ] && echo control $CONTROLS || echo "")
+FILES=$([ ! -z "$INPUT_FILES" ] && echo "$INPUT_FILES" || echo .)
+ACCOUNT_CMD=$([ ! -z "$INPUT_ACCOUNT" ] && echo --account $INPUT_ACCOUNT --submit || echo "")
+THRESHOLD_CRITICAL_CMD=$([ ! -z "$INPUT_THRESHOLDCRITICAL" ] && echo --threshold-critical $INPUT_THRESHOLDCRITICAL || echo "")
+THRESHOLD_HIGH_CMD=$([ ! -z "$INPUT_THRESHOLDHIGH" ] && echo --threshold-high $INPUT_THRESHOLDHIGH || echo "")
+THRESHOLD_MEDIUM_CMD=$([ ! -z "$INPUT_THRESHOLDMEDIUM" ] && echo --threshold-medium $INPUT_THRESHOLDMEDIUM || echo "")
+THRESHOLD_LOW_CMD=$([ ! -z "$INPUT_THRESHOLDLOW" ] && echo --threshold-low $INPUT_THRESHOLDLOW || echo "")
 
-COMMAND="kubescape scan $FRAMEWORK_CMD $CONTROL_CMD $INPUT_FILES --fail-threshold $INPUT_THRESHOLD $INPUT_ARGS"
+COMMAND="kubescape scan $FRAMEWORKS_CMD $CONTROLS_CMD $FILES $ACCOUNT_CMD --fail-threshold $INPUT_THRESHOLD $THRESHOLD_CRITICAL_CMD $THRESHOLD_HIGH_CMD $THRESHOLD_MEDIUM_CMD $THRESHOLD_LOW_CMD"
 
-if [ ! -z "$INPUT_EXCEPTIONS" ]; then
-COMMAND="${COMMAND} --exceptions ${INPUT_EXCEPTIONS}"
-fi
+echo $COMMAND
 
 eval $COMMAND
 
