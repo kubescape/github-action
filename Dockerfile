@@ -1,7 +1,7 @@
-FROM quay.io/kubescape/kubescape:dev-v2.0.359
+FROM quay.io/kubescape/kubescape:dev-v2.0.366
 
 USER root
-COPY entrypoint.sh ./entrypoint.sh
+COPY entrypoint.sh entrypoint.sh
 
 ENV KS_SKIP_UPDATE_CHECK true
 ENV KS_DOWNLOAD_ARTIFACTS false
