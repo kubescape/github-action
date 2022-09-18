@@ -7,7 +7,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: dwertent/github-action@main
         with:
-          threshold: "0"
+          threshold: "50"
           # account: ${{ github.KUBESCAPE_ACCOUNT }}
       - name: Archive kubescape scan results
         uses: actions/upload-artifact@v2
