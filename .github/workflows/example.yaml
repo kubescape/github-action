@@ -1,0 +1,45 @@
+# name: Example
+# on: [push, pull_request]
+   
+# # jobs:
+# #   nsa-security-check:
+# #     runs-on: ubuntu-latest
+
+# #     steps:
+# #       - name: Checkout
+# #         uses: actions/checkout@v2
+
+# #       - name: Install Kubescape
+# #         run: curl -s https://raw.githubusercontent.com/armosec/kubescape/master/install.sh | /bin/bash
+        
+# #       - name: Scan YAML files
+# #         run: kubescape scan framework nsa *.yaml
+# jobs:
+#   kubescape-scan:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v3
+#       - uses: avinashupadhya99/kubescape-action@main
+#         with:
+#           threshold: "50"
+#           # account: ${{ github.KUBESCAPE_ACCOUNT }}
+          
+
+name: kubescape-scan
+
+on:
+  push:
+
+jobs:
+  junit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Publish Unit Test Results
+        uses: mikepenz/action-junit-report@v3
+        if: always()
+        with:
+          report_paths: "*.xml" 
+          require_tests: false
+          fail_on_failure: false
+          detailed_summary: true

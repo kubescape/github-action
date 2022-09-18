@@ -23,12 +23,14 @@ fi
 
 FRAMEWORK_CMD=$([ ! -z "$INPUT_FRAMEWORK" ] && echo "framework $INPUT_FRAMEWORK" || echo "")
 CONTROL_CMD=$([ ! -z "$INPUT_CONTROL" ] && echo control $CONTROLS || echo "")
+ACCOUNT_ID=$([ ! -z "$ACCOUNT_ID" ] && echo --account $ACCOUNT_ID || echo "")
+INPUT_THRESHOLD=$([ ! -z "$INPUT_THRESHOLD" ] && echo --fail-threshold $INPUT_THRESHOLD || echo "")
 
-COMMAND="kubescape scan $FRAMEWORK_CMD $CONTROL_CMD $INPUT_FILES --fail-threshold $INPUT_THRESHOLD $INPUT_ARGS"
+OUTPUT_FILE="results.xml"
+OUTPUT_FORMAT="junit"
 
-if [ ! -z "$INPUT_EXCEPTIONS" ]; then
-COMMAND="${COMMAND} --exceptions ${INPUT_EXCEPTIONS}"
-fi
+COMMAND="kubescape scan --output=$OUTPUT_FILE --format=$OUTPUT_FORMAT $FRAMEWORK_CMD $CONTROL_CMD $INPUT_FILES $INPUT_THRESHOLD $ACCOUNT_ID"
 
+echo running: $COMMAND
 eval $COMMAND
 
