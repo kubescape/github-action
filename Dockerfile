@@ -1,6 +1,5 @@
 FROM quay.io/armosec/kubescape
 
-USER root
-ADD entrypoint.sh /entrypoint.sh
+COPY --chown=armo:armo entrypoint.sh entrypoint.sh
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["./entrypoint.sh"]
