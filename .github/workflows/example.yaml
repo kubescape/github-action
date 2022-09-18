@@ -1,12 +1,11 @@
 name: Example
 on: [push, pull_request]
-
 jobs:
   kubescape-scan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: ${{ github.repository_owner }}/github-action@main
+      - uses: dwertent/github-action@main
         with:
           threshold: "50"
           # account: ${{ github.KUBESCAPE_ACCOUNT }}
