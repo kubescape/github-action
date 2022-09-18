@@ -10,6 +10,7 @@ jobs:
           threshold: "50"
           # account: ${{ github.KUBESCAPE_ACCOUNT }}
   publish-results:
+    needs: kubescape-scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
