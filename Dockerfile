@@ -1,4 +1,4 @@
-FROM quay.io/kubescape/kubescape:dev-v2.0.366
+FROM quay.io/kubescape/kubescape:dev-v2.0.371
 
 USER root
 COPY entrypoint.sh entrypoint.sh
