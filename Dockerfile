@@ -1,4 +1,4 @@
-FROM quay.io/kubescape/kubescape
+FROM quay.io/kubescape/kubescape:v2.0.171
 
 # We will need root privileges, so that kubescape can write the results to a file
 USER root
