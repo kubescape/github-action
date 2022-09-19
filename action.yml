@@ -1,13 +1,10 @@
 name: Kubescape
 description: Run Kubescape scan
-# author:
-
 inputs:
   failedThreshold:
     description: |
       Failure threshold is the percent above which the command fails and 
       returns exit code 1 (default 0 i.e, action fails if any control fails)
-    default: 0
     required: false
   files:
     description: |
@@ -52,7 +49,8 @@ inputs:
     required: false
   format:
     description: |
-      format is the kubescape output format
+      Output format
+      Run `kubescape scan -h` for listing supported formats
     required: false
     default: junit
 runs:
