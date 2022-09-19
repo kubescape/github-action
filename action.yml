@@ -5,7 +5,6 @@ inputs:
     description: |
       Failure threshold is the percent above which the command fails and 
       returns exit code 1 (default 0 i.e, action fails if any control fails)
-    default: "0"
     required: false
   files:
     description: |
