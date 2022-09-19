@@ -3,21 +3,7 @@ description: Run Kubescape scan
 # author:
 
 inputs:
-  args:
-    description: |
-      Arguments to be passed to kubescape scan. The following
-      arguments are supported - 
-      -f, --format - Output format. Supported formats: 
-                    "pretty-printer"/"json"/"junit"/"prometheus"
-                    (default "pretty-printer")
-      -o, --output - Output file. Print output to file and not stdout
-      -s, --silent - Silent progress messages
-      --verbose - Display all of the input resources and not only 
-                  failed resources
-      --logger - Logger level. Supported: debug/info/success/warning/
-                 error/fatal (default "info")
-    required: false
-  threshold:
+  failedThreshold:
     description: |
       Failure threshold is the percent above which the command fails and 
       returns exit code 1 (default 0 i.e, action fails if any control fails)
@@ -26,23 +12,49 @@ inputs:
   files:
     description: |
       Path to the configuration yaml to scan
-    required: true
-  framework:
+    required: false
+  frameworks:
     description: |
       List of all frameworks to scan. Run kubescape list frameworks with 
       the Kubescape CLI to get a list of all frameworks. Either frameworks 
       have to be specified or controls.
     required: false
-  control:
+  controls:
     description: |
       List of all controls to scan. Run kubescape list controls with the 
       Kubescape CLI to get a list of all controls. Either frameworks 
       have to be specified or controls.
     required: false
-  exceptions:
+  account:
     description: |
-      Path to the json file containing exceptions.
+      Account-id for the SAS.
+      Used for custom configuration, such as frameworks, control configuration, etc.
     required: false
+  thresholdCritical:
+    description: |
+      Threshold Critical is the number or more of critical controls that failed 
+      and returns exit code 1
+    required: false
+  thresholdHigh:
+    description: |
+      Threshold High is the number or more of high controls that failed 
+      and returns exit code 1
+    required: false
+  thresholdMedium:
+    description: |
+      Threshold Medium is the number or more of medium controls that failed 
+      and returns exit code 1
+    required: false
+  thresholdLow:
+    description: |
+      Threshold Low is the number or more of low controls that failed 
+      and returns exit code 1
+    required: false
+  format:
+    description: |
+      format is the kubescape output format
+    required: false
+    default: junit
 runs:
   using: docker
   image: Dockerfile
