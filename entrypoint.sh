@@ -34,9 +34,8 @@ else
   if [ -z "$INPUT_ACCOUNTGUID" ]; then
   echo "Account id is not specified. Please provide the account id"
   exit 1
-  else
-  COMMAND="kubescape scan https://github.com/$GITHUB_REPOSITORY $FRAMEWORK_CMD $CONTROL_CMD --fail-threshold $INPUT_THRESHOLD $INPUT_ARGS $EXCEPTIONS_CMD --submit --account=$INPUT_ACCOUNTGUID"
   fi
+  COMMAND="kubescape scan https://github.com/$GITHUB_REPOSITORY $FRAMEWORK_CMD $CONTROL_CMD --fail-threshold $INPUT_THRESHOLD $INPUT_ARGS $EXCEPTIONS_CMD --submit --account=$INPUT_ACCOUNTGUID"
 fi
 
 eval $COMMAND
