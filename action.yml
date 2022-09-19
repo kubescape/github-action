@@ -50,6 +50,11 @@ inputs:
       Threshold Low is the number or more of low controls that failed 
       and returns exit code 1
     required: false
+  format:
+    description: |
+      format is the kubescape output format
+    required: false
+    default: junit
 runs:
   using: docker
   image: Dockerfile
