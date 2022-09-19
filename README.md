@@ -14,6 +14,7 @@ steps:
     with:
       scanRepository: "yes"
       accountGUID: ${{secrets.ACCOUNT_GUID}}
+      framework: nsa
 ```
 
 For Scanning YAML files,
@@ -33,7 +34,7 @@ steps:
 
 | Name | Description | Required |
 | --- | --- | ---|
-| scanRepository | Accepts a "yes" or "no" input to scan the Github Repository. When set to "yes", the action accepts `accountGUID` as the only other and mandatory input. When set to "no", the action accepts `files` as a mandatory input and all other inputs become optional. | Yes |
+| scanRepository | Accepts a "yes" or "no" input to scan the Github Repository. When set to "yes", the action accepts `accountGUID` as a mandatory input and all other inputs become optional. When set to "no", the action accepts `files` as a mandatory input and all other inputs become optional. | Yes |
 | accountGUID | Kubescape account id which can be found at [Kubescape Cloud Platform](https://cloud.armosec.io/configuration-scanning), required only when `scanRepository` is set to "yes". The account id should be kept secret and in `Github Secrets`. The [Examples](https://github.com/kubescape/github-action/blob/main/README.md#examples) have the account id stored as `ACCOUNT_GUID`. | No |
 | files | The YAML files/Helm charts to scan for misconfigurations. The files need to be provided with the complete path from the root of the repository. `files` input is required only when `scanRepository` is set to "no"  | No |
 | threshold | Failure threshold is the percent above which the command fails and returns exit code 1 (default 0 i.e, action fails if any control fails) | No (default 0) |
