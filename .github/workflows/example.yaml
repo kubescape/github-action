@@ -1,26 +1,23 @@
-name: Example
+name: Kubescape scanning for misconfigurations
 on: [push, pull_request]
 jobs:
-  kubescape-scan:
+  kubescape:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: dwertent/github-action@main
-        with:
-          threshold: "50"
-          # account: ${{ github.KUBESCAPE_ACCOUNT }}
-      - name: Archive kubescape scan results
-        uses: actions/upload-artifact@v2
-        if: always()
-        with:
-          name: kubescape-scan-report
-          path: results.xml
-
-      - name: Publish Unit Test Results
-        uses: mikepenz/action-junit-report@v3
-        if: always()
-        with:
-          report_paths: "**.xml" 
-          require_tests: false
-          fail_on_failure: false
-          detailed_summary: true
+    - uses: actions/checkout@v3
+    - uses: kubescape/github-action@main
+      with:
+        # Optional - Add Kubescape cloud account ID.
+        account: ${{secrets.ACCOUNT}}
+        # # Optional - Scan a specific path. Default will scan all
+        # files: "examples/*.yaml"
+    - name: Archive kubescape scan results
+      uses: actions/upload-artifact@v2
+      with:
+        name: kubescape
+        path: results.xml
+    - name: Publish Unit Test Results
+      uses: mikepenz/action-junit-report@v3
+      if: always()
+      with:
+        report_paths: "*.xml" 

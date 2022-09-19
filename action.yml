@@ -1,7 +1,5 @@
 name: Kubescape
 description: Run Kubescape scan
-# author:
-
 inputs:
   failedThreshold:
     description: |
@@ -52,7 +50,8 @@ inputs:
     required: false
   format:
     description: |
-      format is the kubescape output format
+      Output format
+      Run `kubescape scan -h` for listing supported formats
     required: false
     default: junit
 runs:

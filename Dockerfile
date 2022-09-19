@@ -1,12 +1,12 @@
 FROM quay.io/kubescape/kubescape:v2.0.171
 
-# We will need root privileges, so that kubescape can write the results to a file
+# Kubescape uses root privileges for writing the results to a file
 USER root
-COPY entrypoint.sh /entrypoint.sh
 
-# KS_SKIP_UPDATE_CHECK is used to skip checking whether the run is on the latest version of kubescape
+# KS_SKIP_UPDATE_CHECK - skip latest version check
 ENV KS_SKIP_UPDATE_CHECK true
-# KS_DOWNLOAD_ARTIFACTS X is used so that kubescape will not look for whether the artifact exists locally in cache
+# KS_DOWNLOAD_ARTIFACTS - Kubescape will load the policies from the local cache
 ENV KS_DOWNLOAD_ARTIFACTS false
 
+COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
