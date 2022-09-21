@@ -6,6 +6,13 @@ inputs:
       Failure threshold is the percent above which the command fails and 
       returns exit code 1 (default 0 i.e, action fails if any control fails)
     required: false
+  severityThreshold:
+    description: |
+      Severity threshold is the severity of a failed control at or above which
+      the command terminates with an exit code 1 (default is "high", i.e. the
+      action fails if any High severity control fails)
+    required: false
+    default: high
   files:
     description: |
       Path to the configuration yaml to scan
@@ -24,28 +31,8 @@ inputs:
     required: false
   account:
     description: |
-      Account-id for the SAS.
+      Account ID for the Kubescape SaaS.
       Used for custom configuration, such as frameworks, control configuration, etc.
-    required: false
-  thresholdCritical:
-    description: |
-      Threshold Critical is the number or more of critical controls that failed 
-      and returns exit code 1
-    required: false
-  thresholdHigh:
-    description: |
-      Threshold High is the number or more of high controls that failed 
-      and returns exit code 1
-    required: false
-  thresholdMedium:
-    description: |
-      Threshold Medium is the number or more of medium controls that failed 
-      and returns exit code 1
-    required: false
-  thresholdLow:
-    description: |
-      Threshold Low is the number or more of low controls that failed 
-      and returns exit code 1
     required: false
   format:
     description: |
