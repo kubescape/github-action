@@ -55,19 +55,5 @@ jobs:
         run: |
             cosign sign --force ${{ steps.image-name.outputs.IMAGE_NAME }}:latest
             cosign sign --force ${{ steps.image-name.outputs.IMAGE_NAME }}:${{ steps.image-version.outputs.IMAGE_VERSION }}
-  release:
-    name: Create release
-    needs: build-image
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create a release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          release_name: Release v1.0.${{ github.run_number }}
-          tag_name: v1.0.${{ github.run_number }}
-          draft: false
-          prerelease: false
+
           
