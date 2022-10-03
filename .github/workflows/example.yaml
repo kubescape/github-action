@@ -1,11 +1,14 @@
 name: Kubescape scanning for misconfigurations
-on: [push, pull_request]
+on:
+  release:
+    types: [published]
 jobs:
   kubescape:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - uses: kubescape/github-action@main
+      continue-on-error: true
       # with:
       #   failedThreshold: 100
       #   # Optional - Add Kubescape cloud account ID.

@@ -1,0 +1,70 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - '**/example.yaml'
+      - '*/examples/*'
+jobs:
+
+  build-image:
+    name: Build docker container, tag and upload to registry
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      packages: write
+      contents: read
+    steps:
+      
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Set image version
+        id: image-version
+        run: echo '::set-output name=IMAGE_VERSION::v1.0.${{ github.run_number }}'
+
+      - name: Set image name
+        id: image-name
+        run: echo '::set-output name=IMAGE_NAME::quay.io/${{ github.repository_owner }}/github-actions'
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Quay.io
+        env:
+          QUAY_PASSWORD: ${{ secrets.QUAYIO_REGISTRY_PASSWORD }}
+          QUAY_USERNAME: ${{ secrets.QUAYIO_REGISTRY_USERNAME }}
+        run: docker login -u="${QUAY_USERNAME}" -p="${QUAY_PASSWORD}" quay.io
+
+      - name: Build the Docker image
+        run: docker buildx build . --file build/Dockerfile --tag ${{ steps.image-name.outputs.IMAGE_NAME }}:${{ steps.image-version.outputs.IMAGE_VERSION }} --tag ${{ steps.image-name.outputs.IMAGE_NAME }}:latest
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@main
+        with:
+          cosign-release: 'v1.12.0'
+      - name: sign kubescape container image
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+            cosign sign --force ${{ steps.image-name.outputs.IMAGE_NAME }}:latest
+            cosign sign --force ${{ steps.image-name.outputs.IMAGE_NAME }}:${{ steps.image-version.outputs.IMAGE_VERSION }}
+      
+      - name: Create a release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          release_name: Release v1.0.${{ github.run_number }}
+          tag_name: v1.0.${{ github.run_number }}
+          draft: false
+          prerelease: false
+          
