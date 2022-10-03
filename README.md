@@ -18,6 +18,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: kubescape/github-action@main
+      continue-on-error: true
       # with:
         # # Optional - Add Kubescape cloud account ID.
         # account: ${{secrets.KUBESCAPE_ACCOUNT}}
@@ -44,10 +45,7 @@ jobs:
 | controls | The security control(s) to scan the files against. Multiple controls can be specified separated by a comma with no spaces. Example - `Configured liveness probe,Pods in default namespace`. Run `kubescape list controls` with the [Kubescape CLI](https://hub.armo.cloud/docs/installing-kubescape) to get a list of all controls. The complete control name can be specified or the ID such as `C-0001` can be specified. Either controls have to be specified or frameworks. | No |
 | account | Account-id for the [kubescape cloud](https://cloud.armosec.io/). Used for custom configuration, such as frameworks, control configuration, etc. | No |
 | failedThreshold | Failure threshold is the percent above which the command fails and returns exit code 1 (default 0 i.e, action fails if any control fails) | No (default 0) |
-| thresholdCritical |Threshold Critical is the number or more of critical controls that failed  and returns exit code 1 | No |
-| thresholdHigh |Threshold High is the number or more of high controls that failed and returns exit code 1 | No |
-| thresholdMedium |Threshold Medium is the number or more of medium controls that failed and returns exit code 1 | No |
-| thresholdLow |Threshold Low is the number or more of low controls that failed and returns exit code 1 | No |
+| severityThreshold | Severity threshold is the severity of a failed control at or above which the command terminates with an exit code 1 (default is `high`, i.e. the action fails if any High severity control fails) | No |
 
 ## Examples
 
@@ -88,6 +86,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: kubescape/github-action@main
+        continue-on-error: true
         with:
           files: "kubernetes-manifests/*.yaml"
       - name: Archive kubescape scan results
@@ -115,6 +114,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: kubescape/github-action@main
+        continue-on-error: true
         with:
           framework: |
             nsa,mitre
@@ -143,6 +143,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: kubescape/github-action@main
+        continue-on-error: true
         with:
           failedThreshold: 50
       - name: Archive kubescape scan results
@@ -158,7 +159,7 @@ jobs:
 ```
 #### Fail Kubescape scanning based on severity-threshold
 
-Scan repository with Kubescape and failed action if the number of failed resources with severity {X} is more than threshold {X}
+Scan repository with Kubescape and fail the action if the scan found failed controls with severity of Medium and above.
 
 ```yaml
 name: Kubescape scanning for misconfigurations
@@ -169,10 +170,9 @@ jobs:
     steps:
       - uses: action/checkout@v3
       - uses: kubescape/github-action@main
+        continue-on-error: true
         with:
-          thresholdCritical: 1
-          thresholdHigh: 5
-          thresholdMedium: 10
+          severityThreshold: medium
       - name: Archive kubescape scan results
         uses: actions/upload-artifact@v2
         with:
