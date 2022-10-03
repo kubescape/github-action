@@ -42,4 +42,5 @@ inputs:
     default: junit
 runs:
   using: docker
-  image: Dockerfile
+  image: quay.io/kubescape/github-actions
+

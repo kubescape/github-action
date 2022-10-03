@@ -1,13 +1,17 @@
 name: Kubescape scanning for misconfigurations
-on: [push, pull_request]
+on:
+  release:
+    types: [released]
 jobs:
   kubescape:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - uses: kubescape/github-action@main
-      # with:
-      #   failedThreshold: 100
+      continue-on-error: true
+      with:
+        # Optional - Fail pipeline if at least one control has a severity that is at or above the specified severity threshold
+        severityThreshold: critical
       #   # Optional - Add Kubescape cloud account ID.
       #   account: ${{secrets.KUBESCAPE_ACCOUNT}}
       #   # Optional - Scan a specific path. Default will scan all

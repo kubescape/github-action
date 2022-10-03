@@ -18,6 +18,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: kubescape/github-action@main
+      continue-on-error: true
       # with:
         # # Optional - Add Kubescape cloud account ID.
         # account: ${{secrets.KUBESCAPE_ACCOUNT}}
@@ -85,6 +86,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: kubescape/github-action@main
+        continue-on-error: true
         with:
           files: "kubernetes-manifests/*.yaml"
       - name: Archive kubescape scan results
@@ -112,6 +114,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: kubescape/github-action@main
+        continue-on-error: true
         with:
           framework: |
             nsa,mitre
@@ -140,6 +143,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: kubescape/github-action@main
+        continue-on-error: true
         with:
           failedThreshold: 50
       - name: Archive kubescape scan results
@@ -166,6 +170,7 @@ jobs:
     steps:
       - uses: action/checkout@v3
       - uses: kubescape/github-action@main
+        continue-on-error: true
         with:
           severityThreshold: medium
       - name: Archive kubescape scan results
