@@ -21,7 +21,7 @@ if [ ! -z "$INPUT_CONTROLS" ]; then
     CONTROLS=$(echo "${CONTROLS%?}")
 fi
 
-ARTIFACTS_PATH="/home/armo/.kubescape"
+ARTIFACTS_PATH="/home/ks/.kubescape"
 FRAMEWORKS_CMD=$([ ! -z "$INPUT_FRAMEWORKS" ] && echo "framework $INPUT_FRAMEWORKS" || echo "")
 CONTROLS_CMD=$([ ! -z "$INPUT_CONTROLS" ] && echo control $CONTROLS || echo "")
 FILES=$([ ! -z "$INPUT_FILES" ] && echo "$INPUT_FILES" || echo .)
