@@ -7,4 +7,5 @@ USER root
 ENV KS_SKIP_UPDATE_CHECK true
 
 COPY entrypoint.sh /entrypoint.sh
+
 ENTRYPOINT ["/entrypoint.sh"]
