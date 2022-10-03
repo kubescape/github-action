@@ -55,6 +55,5 @@ inputs:
     default: junit
 runs:
   using: docker
-  image: quay.io/dwertent/github-actions
-  # image: quay.io/kubescape/github-actions:latest
+  image: quay.io/kubescape/github-actions
 

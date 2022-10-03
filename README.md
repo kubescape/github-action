@@ -88,6 +88,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: kubescape/github-action@main
+        continue-on-error: true
         with:
           files: "kubernetes-manifests/*.yaml"
       - name: Archive kubescape scan results
@@ -115,6 +116,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: kubescape/github-action@main
+        continue-on-error: true
         with:
           framework: |
             nsa,mitre
@@ -143,6 +145,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: kubescape/github-action@main
+        continue-on-error: true
         with:
           failedThreshold: 50
       - name: Archive kubescape scan results
@@ -169,6 +172,7 @@ jobs:
     steps:
       - uses: action/checkout@v3
       - uses: kubescape/github-action@main
+        continue-on-error: true
         with:
           thresholdCritical: 1
           thresholdHigh: 5
