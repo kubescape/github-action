@@ -17,6 +17,10 @@ inputs:
     description: |
       Path to the configuration yaml to scan
     required: false
+  outputFile:
+    description: |
+      Name of the output file. Default is "results.out".
+    required: false
   frameworks:
     description: |
       List of all frameworks to scan. Run kubescape list frameworks with 
