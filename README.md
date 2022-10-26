@@ -7,7 +7,7 @@ You need to make sure that workflows have [Read and write permissions](https://d
 
 ## Usage
 
-Add the following step to your workflow configuration:
+To scan your repository with Kubescape in your Github workflow, add the following steps to your workflow configuration:
 
 ```yaml
 name: Kubescape scanning for misconfigurations
@@ -19,59 +19,31 @@ jobs:
     - uses: actions/checkout@v3
     - uses: kubescape/github-action@main
       continue-on-error: true
-      # with:
-        # # Optional - Add Kubescape cloud account ID.
-        # account: ${{secrets.KUBESCAPE_ACCOUNT}}
-        # # Optional - Scan a specific path. Default will scan all
-        # files: "examples/*.yaml"
-    - name: Archive kubescape scan results
-      uses: actions/upload-artifact@v2
       with:
-        name: kubescape
-        path: results.xml
-    - name: Publish Unit Test Results
-      uses: mikepenz/action-junit-report@v3
-      if: always()
-      with:
-        report_paths: "*.xml" 
-```
-
-We also support Github Code Scanning!
-If you want to see the scan results in your _Security → Code scanning_ tab and Pull Requests, you would need Kubescape to output the scan in the SARIF format and upload it to Github.
-You can achieve that by adding the following workflow:
-
-```yaml
-name: Kubescape misconfigurations scan
-on: [push, pull_request]
-jobs:
-  kubescape:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: kubescape/github-action@main
-      continue-on-error: true
-      with:
-        # Github Code Scanning supports only the SARIF format
         format: sarif
+        outputFile: results.sarif
         # # Optional - Add Kubescape cloud account ID.
         # account: ${{secrets.KUBESCAPE_ACCOUNT}}
         # # Optional - Scan a specific path. Default will scan all
         # files: "examples/*.yaml"
-    # Upload the scan results to the Github so they show up in the Github Code Scanning
     - name: Upload Kubescape scan results to Github Code Scanning
       uses: actions/upload-sarif@v2
       with:
-        sarif_file: results
+        sarif_file: results.sarif
 ```
+
+This workflow definition scans your repository with Kubescape and publishes the results to Github.
+You can then see the results in the Pull Request that triggered the scan and the _Security → Code scanning_ tab.
 
 ## Inputs
 
 | Name | Description | Required |
 | --- | --- | ---|
-| files | The YAML files/Helm charts to scan for misconfigurations. The files need to be provided with the complete path from the root of the repository. | No (default all repository) |
-| frameworks | The security framework(s) to scan the files against. Multiple frameworks can be specified separated by a comma with no spaces. Example - `nsa,devopsbest`. Run `kubescape list frameworks` with the [Kubescape CLI](https://hub.armo.cloud/docs/installing-kubescape) to get a list of all frameworks. Either frameworks have to be specified or controls. | No |
-| controls | The security control(s) to scan the files against. Multiple controls can be specified separated by a comma with no spaces. Example - `Configured liveness probe,Pods in default namespace`. Run `kubescape list controls` with the [Kubescape CLI](https://hub.armo.cloud/docs/installing-kubescape) to get a list of all controls. The complete control name can be specified or the ID such as `C-0001` can be specified. Either controls have to be specified or frameworks. | No |
-| account | Account-id for the [kubescape cloud](https://cloud.armosec.io/). Used for custom configuration, such as frameworks, control configuration, etc. | No |
+| files | YAML files or Helm charts to scan for misconfigurations. The files need to be provided with the complete path from the root of the repository. | No (default is `.` which scans the whole repository) |
+| outputFile | Name of the output file where the scan result will be stored. | No (default is `results.out`) |
+| frameworks | Security framework(s) to scan the files against. Multiple frameworks can be specified separated by a comma with no spaces. Example - `nsa,devopsbest`. Run `kubescape list frameworks` with the [Kubescape CLI](https://hub.armo.cloud/docs/installing-kubescape) to get a list of all frameworks. Either frameworks have to be specified or controls. | No |
+| controls | Security control(s) to scan the files against. Multiple controls can be specified separated by a comma with no spaces. Example - `Configured liveness probe,Pods in default namespace`. Run `kubescape list controls` with the [Kubescape CLI](https://hub.armo.cloud/docs/installing-kubescape) to get a list of all controls. The complete control name can be specified or the ID such as `C-0001` can be specified. Either controls have to be specified or frameworks. | No |
+| account | Account ID for the [kubescape cloud](https://cloud.armosec.io/). Used for custom configuration, such as frameworks, control configuration, etc. | No |
 | failedThreshold | Failure threshold is the percent above which the command fails and returns exit code 1 (default 0 i.e, action fails if any control fails) | No (default 0) |
 | severityThreshold | Severity threshold is the severity of a failed control at or above which the command terminates with an exit code 1 (default is `high`, i.e. the action fails if any High severity control fails) | No |
 
