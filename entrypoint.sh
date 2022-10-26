@@ -30,7 +30,7 @@ CONTROLS_CMD=$([ ! -z "$INPUT_CONTROLS" ] && echo control $CONTROLS || echo "")
 FILES=$([ ! -z "$INPUT_FILES" ] && echo "$INPUT_FILES" || echo .)
 
 # Output file name
-OUTPUT_FILE=$([ ! -z "$OUTPUT_FILE" ] && echo "$OUTPUT_FILE" || echo "results.out")
+OUTPUT_FILE=$([ ! -z "$INPUT_OUTPUTFILE" ] && echo "$INPUT_OUTPUTFILE" || echo "results.out")
 
 # Command-line options
 ACCOUNT_OPT=$([ ! -z "$INPUT_ACCOUNT" ] && echo --account $INPUT_ACCOUNT --submit || echo "")
