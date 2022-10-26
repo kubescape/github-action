@@ -36,6 +36,34 @@ jobs:
         report_paths: "*.xml" 
 ```
 
+We also support Github Code Scanning!
+If you want to see the scan results in your _Security → Code scanning_ tab and Pull Requests, you would need Kubescape to output the scan in the SARIF format and upload it to Github.
+You can achieve that by adding the following workflow:
+
+```yaml
+name: Kubescape misconfigurations scan
+on: [push, pull_request]
+jobs:
+  kubescape:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: kubescape/github-action@main
+      continue-on-error: true
+      with:
+        # Github Code Scanning supports only the SARIF format
+        format: sarif
+        # # Optional - Add Kubescape cloud account ID.
+        # account: ${{secrets.KUBESCAPE_ACCOUNT}}
+        # # Optional - Scan a specific path. Default will scan all
+        # files: "examples/*.yaml"
+    # Upload the scan results to the Github so they show up in the Github Code Scanning
+    - name: Upload Kubescape scan results to Github Code Scanning
+      uses: actions/upload-sarif@v2
+      with:
+        sarif_file: results
+```
+
 ## Inputs
 
 | Name | Description | Required |
