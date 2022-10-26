@@ -27,7 +27,7 @@ jobs:
         # # Optional - Scan a specific path. Default will scan all
         # files: "examples/*.yaml"
     - name: Upload Kubescape scan results to Github Code Scanning
-      uses: actions/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v2
       with:
         sarif_file: results.sarif
 ```
