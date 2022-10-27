@@ -1,7 +1,5 @@
 name: Kubescape scanning for misconfigurations
-on:
-  release:
-    types: [released]
+on: [push, pull_request]
 jobs:
   kubescape:
     runs-on: ubuntu-latest
@@ -10,19 +8,13 @@ jobs:
     - uses: kubescape/github-action@main
       continue-on-error: true
       with:
-        # Optional - Fail pipeline if at least one control has a severity that is at or above the specified severity threshold
-        severityThreshold: critical
-      #   # Optional - Add Kubescape cloud account ID.
-      #   account: ${{secrets.KUBESCAPE_ACCOUNT}}
-      #   # Optional - Scan a specific path. Default will scan all
-      #   files: "examples/*.yaml"
-    - name: Archive kubescape scan results
-      uses: actions/upload-artifact@v2
+        format: sarif
+        outputFile: results.sarif
+        # # Optional - Add Kubescape cloud account ID.
+        # account: ${{secrets.KUBESCAPE_ACCOUNT}}
+        # # Optional - Scan a specific path. Default will scan all
+        # files: "examples/*.yaml"
+    - name: Upload Kubescape scan results to Github Code Scanning
+      uses: github/codeql-action/upload-sarif@v2
       with:
-        name: kubescape
-        path: results.xml
-    - name: Publish Unit Test Results
-      uses: mikepenz/action-junit-report@v3
-      if: always()
-      with:
-        report_paths: "*.xml" 
+        sarif_file: results.sarif
