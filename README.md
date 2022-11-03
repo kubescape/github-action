@@ -22,9 +22,9 @@ jobs:
       with:
         format: sarif
         outputFile: results.sarif
-        # # Optional - Add Kubescape cloud account ID.
+        # # Optional: Specify the Kubescape cloud account ID
         # account: ${{secrets.KUBESCAPE_ACCOUNT}}
-        # # Optional - Scan a specific path. Default will scan all
+        # # Optional: Scan a specific path. Default will scan the whole repository
         # files: "examples/*.yaml"
     - name: Upload Kubescape scan results to Github Code Scanning
       uses: github/codeql-action/upload-sarif@v2
@@ -50,7 +50,7 @@ You can then see the results in the Pull Request that triggered the scan and the
 ## Examples
 
 
-#### Scan and submit results to the [Kubescape cloud](https://cloud.armosec.io/)
+#### Scan and submit results to the [Kubescape Cloud](https://cloud.armosec.io/)
 
 ```yaml
 name: Kubescape scanning for misconfigurations
@@ -59,23 +59,48 @@ jobs:
   kubescape:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: kubescape/github-action@main
-        with:
-          account: ${{secrets.ACCOUNT}}
-      - name: Archive kubescape scan results
-        uses: actions/upload-artifact@v2
-        with:
-          name: kubescape-scan-report
-          path: results.xml
-      - name: Publish Unit Test Results
-        uses: mikepenz/action-junit-report@v3
-        if: always()
-        with:
-          report_paths: "*.xml" 
+    - uses: actions/checkout@v3
+    - uses: kubescape/github-action@main
+      continue-on-error: true
+      with:
+        format: sarif
+        outputFile: results.sarif
+        # Specify the Kubescape cloud account ID
+        account: ${{secrets.KUBESCAPE_ACCOUNT}}
+    - name: Upload Kubescape scan results to Github Code Scanning
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: results.sarif
 ```
 
-#### Scan specific Kubernetes YAML paths
+#### Scan specific file paths
+
+Scan a spefic pathspec, for example `examples/kubernetes-manifests/*.yaml`:
+
+```yaml
+name: Kubescape scanning for misconfigurations
+on: [push, pull_request]
+jobs:
+  kubescape:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: kubescape/github-action@main
+      continue-on-error: true
+      with:
+        format: sarif
+        outputFile: results.sarif
+        # Scan a specific path. Default will scan the whole repository
+        files: "examples/kubernetes-manifests/*.yaml"
+    - name: Upload Kubescape scan results to Github Code Scanning
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: results.sarif
+```
+
+#### Scan against specific frameworks
+
+Perform a Kubescape scan against a list of specific frameworks, namely, NSA and MITRE:
 
 ```yaml
 name: Kubescape scanning for misconfigurations
@@ -88,51 +113,19 @@ jobs:
       - uses: kubescape/github-action@main
         continue-on-error: true
         with:
-          files: "kubernetes-manifests/*.yaml"
-      - name: Archive kubescape scan results
-        uses: actions/upload-artifact@v2
-        with:
-          name: kubescape-scan-report
-          path: results.xml
-      - name: Publish Unit Test Results
-        uses: mikepenz/action-junit-report@v3
-        if: always()
-        with:
-          report_paths: "*.xml" 
-```
-
-#### Scan a list of specific frameworks
-
-Scan repository using Kubescape against a list of specific frameworks
-
-```yaml
-name: Kubescape scanning for misconfigurations
-on: [push, pull_request]
-jobs:
-  kubescape:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: kubescape/github-action@main
-        continue-on-error: true
-        with:
+          format: sarif
+          outputFile: results.sarif
           framework: |
             nsa,mitre
-      - name: Archive kubescape scan results
-        uses: actions/upload-artifact@v2
+      - name: Upload Kubescape scan results to Github Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
         with:
-          name: kubescape-scan-report
-          path: results.xml
-      - name: Publish Unit Test Results
-        uses: mikepenz/action-junit-report@v3
-        if: always()
-        with:
-          report_paths: "*.xml" 
+          sarif_file: results.sarif
 ```
 
-#### Fail Kubescape scanning based on failed-threshold
+#### Fail Kubescape scanning based on the percentage of failed controls
 
-Scan repository with Kubescape and failed action if the percent of failed controls is more than failedThreshold
+Scan a repository with Kubescape and fail the scanning step if the percent of failed controls is more than the specified `failedThreshold`:
 
 ```yaml
 name: Kubescape scanning for misconfigurations
@@ -143,23 +136,19 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: kubescape/github-action@main
-        continue-on-error: true
+        continue-on-error: false
         with:
+          format: sarif
+          outputFile: results.sarif
           failedThreshold: 50
-      - name: Archive kubescape scan results
-        uses: actions/upload-artifact@v2
+      - name: Upload Kubescape scan results to Github Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
         with:
-          name: kubescape
-          path: results.xml
-      - name: Publish Unit Test Results
-        uses: mikepenz/action-junit-report@v3
-        if: always()
-        with:
-          report_paths: "*.xml" 
+          sarif_file: results.sarif
 ```
-#### Fail Kubescape scanning based on severity-threshold
+#### Fail Kubescape scanning based on maximum severity of a failed control
 
-Scan repository with Kubescape and fail the action if the scan found failed controls with severity of Medium and above.
+Scan a repository with Kubescape and fail the scanning step if the scan has found failed controls with severity of Medium and above:
 
 ```yaml
 name: Kubescape scanning for misconfigurations
@@ -170,18 +159,14 @@ jobs:
     steps:
       - uses: action/checkout@v3
       - uses: kubescape/github-action@main
-        continue-on-error: true
+        continue-on-error: false
         with:
+          format: sarif
+          outputFile: results.sarif
           severityThreshold: medium
-      - name: Archive kubescape scan results
-        uses: actions/upload-artifact@v2
+      - name: Upload Kubescape scan results to Github Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
         with:
-          name: kubescape
-          path: results.xml
-      - name: Publish Unit Test Results
-        uses: mikepenz/action-junit-report@v3
-        if: always()
-        with:
-          report_paths: "*.xml" 
+          sarif_file: results.sarif
 ```
- 
+
