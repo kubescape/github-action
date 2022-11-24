@@ -2,6 +2,9 @@
 
 set -e
 
+# Declear ks client  
+export KS_CLIENT="github_actions"
+
 if [ ! -z "$INPUT_FRAMEWORKS" ] && [ ! -z "$INPUT_CONTROLS" ]; then
 echo "Framework and Control is specified. Please specify either one of them or neither"
 exit 1
