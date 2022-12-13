@@ -115,7 +115,7 @@ jobs:
         with:
           format: sarif
           outputFile: results.sarif
-          framework: |
+          frameworks: |
             nsa,mitre
       - name: Upload Kubescape scan results to Github Code Scanning
         uses: github/codeql-action/upload-sarif@v2

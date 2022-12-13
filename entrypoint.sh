@@ -2,6 +2,9 @@
 
 set -e
 
+# Declear ks client  
+export KS_CLIENT="github_actions"
+
 if [ ! -z "$INPUT_FRAMEWORKS" ] && [ ! -z "$INPUT_CONTROLS" ]; then
 echo "Framework and Control is specified. Please specify either one of them or neither"
 exit 1
@@ -33,12 +36,15 @@ FILES=$([ ! -z "$INPUT_FILES" ] && echo "$INPUT_FILES" || echo .)
 OUTPUT_FILE=$([ ! -z "$INPUT_OUTPUTFILE" ] && echo "$INPUT_OUTPUTFILE" || echo "results.out")
 
 # Command-line options
-ACCOUNT_OPT=$([ ! -z "$INPUT_ACCOUNT" ] && echo --account $INPUT_ACCOUNT --submit || echo "")
+ACCOUNT_OPT=$([ ! -z "$INPUT_ACCOUNT" ] && echo --account $INPUT_ACCOUNT || echo "")
+
+# If account ID is empty, we load artifacts from the local path, otherwise we load from the cloud (this will enable custom framework support)
+ARTIFACTS=$([ ! -z "$INPUT_ACCOUNT" ] && echo "" || echo --use-artifacts-from $ARTIFACTS_PATH)
 
 FAIL_THRESHOLD_OPT=$([ ! -z "$INPUT_FAILEDTHRESHOLD" ] && echo --fail-threshold $INPUT_FAILEDTHRESHOLD || echo "")
 SEVERITY_THRESHOLD_OPT=$([ ! -z "$INPUT_SEVERITYTHRESHOLD" ] && echo --severity-threshold $INPUT_SEVERITYTHRESHOLD || echo "")
 
-COMMAND="kubescape scan $FRAMEWORKS_CMD $CONTROLS_CMD $FILES $ACCOUNT_OPT $FAIL_THRESHOLD_OPT $SEVERITY_THRESHOLD_OPT --format $INPUT_FORMAT --output $OUTPUT_FILE --use-artifacts-from $ARTIFACTS_PATH"
+COMMAND="kubescape scan $FRAMEWORKS_CMD $CONTROLS_CMD $FILES $ACCOUNT_OPT $FAIL_THRESHOLD_OPT $SEVERITY_THRESHOLD_OPT --format $INPUT_FORMAT --output $OUTPUT_FILE $ARTIFACTS"
 
 eval $COMMAND
 
