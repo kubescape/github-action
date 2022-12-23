@@ -1,4 +1,4 @@
-FROM quay.io/kubescape/kubescape:v2.0.178
+FROM quay.io/kubescape/kubescape:v2.0.179
 
 # Kubescape uses root privileges for writing the results to a file
 USER root
