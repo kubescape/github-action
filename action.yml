@@ -40,7 +40,9 @@ inputs:
     required: false
   format:
     description: |
-      Output format
+      Output format.
+
+      Can accept multiple comma-separated formats, e.g. "sarif,json,html"
       Run `kubescape scan -h` for listing supported formats
     required: false
     default: junit
