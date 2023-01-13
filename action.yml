@@ -19,7 +19,12 @@ inputs:
     required: false
   outputFile:
     description: |
-      Name of the output file. Default is "results.out".
+      Name of the output file, without the extension.
+
+      Default is "results".
+
+      Kubescape adds the appropriate extension automatically to support both
+      single and multiple output formats.
     required: false
   frameworks:
     description: |
@@ -42,10 +47,26 @@ inputs:
     description: |
       Output format.
 
-      Can accept multiple comma-separated formats, e.g. "sarif,json,html"
-      Run `kubescape scan -h` for listing supported formats
+      Can take one or more formats. To use one format, omit the comma, e.g
+      `format: json`. To produce results in multiple formats, separate them with
+      a comma: `format: sarif,json`.
+
+      For example, when using `output: "results"` and `format: "sarif,json"`,
+      Kubescape will produce 2 files: `results.sarif` and `results.json`. You
+      can then use `results.sarif` to publish results to Github Code Scanning
+      and `results.json` to suggest automatic fixes.
+
+      Run `kubescape scan -h` to see a list of supported formats.
     required: false
     default: junit
+  fixFiles:
+    description: |
+      Whether Kubescape will automatically fix files or not.
+
+      If enabled, Kubescape will make fixes to the input files. You can then
+      use these fixes to open Pull Requests from your CI/CD pipeline.
+    required: false
+    default: false
 runs:
   using: docker
   image: Dockerfile
