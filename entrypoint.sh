@@ -26,7 +26,7 @@ fi
 
 # Fixing files requires a JSON output file to be present
 have_json_format="false"
-if [ ! -z "$INPUT_FORMATS" ] && contains $INPUT_FORMATS "json"; then
+if [ ! -z "$INPUT_FORMAT" ] && contains $INPUT_FORMAT "json"; then
     have_json_format="true"
 fi
 
@@ -36,7 +36,7 @@ if [ "$INPUT_FIXFILES" = "true" ]; then
 fi
 
 if [ "$should_fix_files" = "true" ] && [ "$have_json_format" != "true" ]; then
-    echo 'No output in JSON format to fix files. Autofixng files requires a JSON output file to be present. Please use `format: "json[,OTHER_FORMATS]`'
+    echo 'No output in JSON format to fix files. Autofixing files requires a JSON output file to be present. Please use `format: "json[,OTHER_FORMATS]`'
     exit 1
 fi
 
