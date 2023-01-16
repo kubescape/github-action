@@ -84,6 +84,6 @@ SCAN_COMMAND="kubescape scan $FRAMEWORKS_CMD $CONTROLS_CMD $FILES $ACCOUNT_OPT $
 eval $SCAN_COMMAND
 
 if [ "$should_fix_files" = "true" ]; then
-    fix_command="yes | kubescape fix $OUTPUT_FILE"
+    fix_command="yes | kubescape fix $OUTPUT_FILE.json"
     eval $fix_command
 fi
