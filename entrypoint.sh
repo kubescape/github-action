@@ -79,7 +79,7 @@ SEVERITY_THRESHOLD_OPT=$([ ! -z "$INPUT_SEVERITYTHRESHOLD" ] && echo --severity-
 # ignore this flag.
 format_version_opt="--format-version v2"
 
-SCAN_COMMAND="kubescape scan $FRAMEWORKS_CMD $CONTROLS_CMD $FILES $ACCOUNT_OPT $FAIL_THRESHOLD_OPT $SEVERITY_THRESHOLD_OPT --format $INPUT_FORMAT $format_version_opt --output $OUTPUT_FILE $ARTIFACTS"
+SCAN_COMMAND="kubescape scan $FRAMEWORKS_CMD $CONTROLS_CMD $FILES $ACCOUNT_OPT $FAIL_THRESHOLD_OPT $SEVERITY_THRESHOLD_OPT --format $INPUT_FORMAT $format_version_opt --output $OUTPUT_FILE"
 
 eval $SCAN_COMMAND
 
