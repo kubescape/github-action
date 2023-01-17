@@ -71,7 +71,14 @@ artifacts=$([ -n "${INPUT_ACCOUNT}" ] && echo "" || echo --use-artifacts-from "$
 
 fail_threshold_opt=$([ -n "${INPUT_FAILEDTHRESHOLD}" ] && echo --fail-threshold "${INPUT_FAILEDTHRESHOLD}" || echo "")
 
-severity_threshold_opt=$([ -n "${INPUT_SEVERITYTHRESHOLD}" ] && echo --severity-threshold "${INPUT_SEVERITYTHRESHOLD}" || echo "")
+# When a user requests to fix files, the action should not fail because the
+# results exceed severity. This is subject to change in the future.
+severity_threshold_opt=$(\
+	[ -n "${INPUT_SEVERITYTHRESHOLD}" ] \
+	&& [ "${should_fix_files}" = "false" ] \
+	&& echo --severity-threshold "${INPUT_SEVERITYTHRESHOLD}" \
+	|| echo "" \
+)
 
 # The `kubescape fix` subcommand requires the latest "json" format version.
 # Other formats ignore this flag.
@@ -79,6 +86,7 @@ format_version_opt="--format-version v2"
 
 scan_command="kubescape scan ${frameworks_cmd} ${controls_cmd} ${files} ${account_opt} ${fail_threshold_opt} ${severity_threshold_opt} --format ${output_formats} ${format_version_opt} --output ${output_file}"
 
+echo "${scan_command}"
 eval "${scan_command}"
 
 if [ "$should_fix_files" = "true" ]; then
