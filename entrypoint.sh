@@ -26,7 +26,7 @@ fi
 
 # Fixing files requires a JSON output file to be present
 have_json_format="false"
-if [ -n "$INPUT_FORMAT" ] && contains $INPUT_FORMAT "json"; then
+if [ -n "$INPUT_FORMAT" ] && contains "${INPUT_FORMAT}" "json"; then
     have_json_format="true"
 fi
 
@@ -36,7 +36,7 @@ if [ "$INPUT_FIXFILES" = "true" ]; then
 fi
 
 if [ "$should_fix_files" = "true" ] && [ "$have_json_format" != "true" ]; then
-    echo 'No output in JSON format to fix files. Autofixing files requires a JSON output file to be present. Please use `format: "json[,OTHER_FORMATS]`'
+    echo 'No output in JSON format to fix files. Autofixing files requires a JSON output file to be present. Please use "format: "json[,OTHER_FORMATS]"'
     exit 1
 fi
 
@@ -44,11 +44,11 @@ fi
 if [ -n "$INPUT_CONTROLS" ]; then
     CONTROLS=""
     set -f; IFS=','
-    set -- $INPUT_CONTROLS
+    set -- "${INPUT_CONTROLS}"
     set +f; unset IFS
     for control in "$@"
     do
-        control=$(echo $control | xargs) # Remove leading/trailing whitespaces
+        control=$(echo "${control}" | xargs) # Remove leading/trailing whitespaces
         CONTROLS="$CONTROLS\"$control\","
     done
     CONTROLS=$(echo "${CONTROLS%?}")
@@ -57,7 +57,7 @@ fi
 # Subcommands
 ARTIFACTS_PATH="/home/ks/.kubescape"
 FRAMEWORKS_CMD=$([ -n "$INPUT_FRAMEWORKS" ] && echo "framework $INPUT_FRAMEWORKS" || echo "")
-CONTROLS_CMD=$([ -n "$INPUT_CONTROLS" ] && echo control $CONTROLS || echo "")
+CONTROLS_CMD=$([ -n "$INPUT_CONTROLS" ] && echo control "${CONTROLS}" || echo "")
 
 # Files to scan
 FILES=$([ -n "$INPUT_FILES" ] && echo "$INPUT_FILES" || echo .)
@@ -66,14 +66,14 @@ FILES=$([ -n "$INPUT_FILES" ] && echo "$INPUT_FILES" || echo .)
 OUTPUT_FILE=$([ -n "$INPUT_OUTPUTFILE" ] && echo "$INPUT_OUTPUTFILE" || echo "results")
 
 # Command-line options
-ACCOUNT_OPT=$([ -n "$INPUT_ACCOUNT" ] && echo --account $INPUT_ACCOUNT || echo "")
+ACCOUNT_OPT=$([ -n "$INPUT_ACCOUNT" ] && echo --account "${INPUT_ACCOUNT}" || echo "")
 
 # If account ID is empty, we load artifacts from the local path, otherwise we
 # load from the cloud (this will enable custom framework support)
-ARTIFACTS=$([ -n "$INPUT_ACCOUNT" ] && echo "" || echo --use-artifacts-from $ARTIFACTS_PATH)
+ARTIFACTS=$([ -n "$INPUT_ACCOUNT" ] && echo "" || echo --use-artifacts-from "${ARTIFACTS_PATH}")
 
-FAIL_THRESHOLD_OPT=$([ -n "$INPUT_FAILEDTHRESHOLD" ] && echo --fail-threshold $INPUT_FAILEDTHRESHOLD || echo "")
-SEVERITY_THRESHOLD_OPT=$([ -n "$INPUT_SEVERITYTHRESHOLD" ] && echo --severity-threshold $INPUT_SEVERITYTHRESHOLD || echo "")
+FAIL_THRESHOLD_OPT=$([ -n "$INPUT_FAILEDTHRESHOLD" ] && echo --fail-threshold "${INPUT_FAILEDTHRESHOLD}" || echo "")
+SEVERITY_THRESHOLD_OPT=$([ -n "$INPUT_SEVERITYTHRESHOLD" ] && echo --severity-threshold "${INPUT_SEVERITYTHRESHOLD}" || echo "")
 
 # `kubescape fix` requires the latest "json" format version. Other formats
 # ignore this flag.
@@ -81,9 +81,9 @@ format_version_opt="--format-version v2"
 
 SCAN_COMMAND="kubescape scan $FRAMEWORKS_CMD $CONTROLS_CMD $FILES $ACCOUNT_OPT $FAIL_THRESHOLD_OPT $SEVERITY_THRESHOLD_OPT --format $INPUT_FORMAT $format_version_opt --output $OUTPUT_FILE"
 
-eval $SCAN_COMMAND
+eval "${SCAN_COMMAND}"
 
 if [ "$should_fix_files" = "true" ]; then
     fix_command="yes | kubescape fix $OUTPUT_FILE.json"
-    eval $fix_command
+    eval "${fix_command}"
 fi
