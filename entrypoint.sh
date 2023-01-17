@@ -19,14 +19,14 @@ set -e
 # Declare Kubescape client
 export KS_CLIENT="github_actions"
 
-if [ ! -z "$INPUT_FRAMEWORKS" ] && [ ! -z "$INPUT_CONTROLS" ]; then
+if [ -n "$INPUT_FRAMEWORKS" ] && [ -n "$INPUT_CONTROLS" ]; then
     echo "Framework and Control is specified. Please specify either one of them or neither"
     exit 1
 fi
 
 # Fixing files requires a JSON output file to be present
 have_json_format="false"
-if [ ! -z "$INPUT_FORMAT" ] && contains $INPUT_FORMAT "json"; then
+if [ -n "$INPUT_FORMAT" ] && contains $INPUT_FORMAT "json"; then
     have_json_format="true"
 fi
 
@@ -41,7 +41,7 @@ if [ "$should_fix_files" = "true" ] && [ "$have_json_format" != "true" ]; then
 fi
 
 # Split the controls by comma and concatenate with quotes around each control
-if [ ! -z "$INPUT_CONTROLS" ]; then
+if [ -n "$INPUT_CONTROLS" ]; then
     CONTROLS=""
     set -f; IFS=','
     set -- $INPUT_CONTROLS
@@ -56,24 +56,24 @@ fi
 
 # Subcommands
 ARTIFACTS_PATH="/home/ks/.kubescape"
-FRAMEWORKS_CMD=$([ ! -z "$INPUT_FRAMEWORKS" ] && echo "framework $INPUT_FRAMEWORKS" || echo "")
-CONTROLS_CMD=$([ ! -z "$INPUT_CONTROLS" ] && echo control $CONTROLS || echo "")
+FRAMEWORKS_CMD=$([ -n "$INPUT_FRAMEWORKS" ] && echo "framework $INPUT_FRAMEWORKS" || echo "")
+CONTROLS_CMD=$([ -n "$INPUT_CONTROLS" ] && echo control $CONTROLS || echo "")
 
 # Files to scan
-FILES=$([ ! -z "$INPUT_FILES" ] && echo "$INPUT_FILES" || echo .)
+FILES=$([ -n "$INPUT_FILES" ] && echo "$INPUT_FILES" || echo .)
 
 # Output file name
-OUTPUT_FILE=$([ ! -z "$INPUT_OUTPUTFILE" ] && echo "$INPUT_OUTPUTFILE" || echo "results")
+OUTPUT_FILE=$([ -n "$INPUT_OUTPUTFILE" ] && echo "$INPUT_OUTPUTFILE" || echo "results")
 
 # Command-line options
-ACCOUNT_OPT=$([ ! -z "$INPUT_ACCOUNT" ] && echo --account $INPUT_ACCOUNT || echo "")
+ACCOUNT_OPT=$([ -n "$INPUT_ACCOUNT" ] && echo --account $INPUT_ACCOUNT || echo "")
 
 # If account ID is empty, we load artifacts from the local path, otherwise we
 # load from the cloud (this will enable custom framework support)
-ARTIFACTS=$([ ! -z "$INPUT_ACCOUNT" ] && echo "" || echo --use-artifacts-from $ARTIFACTS_PATH)
+ARTIFACTS=$([ -n "$INPUT_ACCOUNT" ] && echo "" || echo --use-artifacts-from $ARTIFACTS_PATH)
 
-FAIL_THRESHOLD_OPT=$([ ! -z "$INPUT_FAILEDTHRESHOLD" ] && echo --fail-threshold $INPUT_FAILEDTHRESHOLD || echo "")
-SEVERITY_THRESHOLD_OPT=$([ ! -z "$INPUT_SEVERITYTHRESHOLD" ] && echo --severity-threshold $INPUT_SEVERITYTHRESHOLD || echo "")
+FAIL_THRESHOLD_OPT=$([ -n "$INPUT_FAILEDTHRESHOLD" ] && echo --fail-threshold $INPUT_FAILEDTHRESHOLD || echo "")
+SEVERITY_THRESHOLD_OPT=$([ -n "$INPUT_SEVERITYTHRESHOLD" ] && echo --severity-threshold $INPUT_SEVERITYTHRESHOLD || echo "")
 
 # `kubescape fix` requires the latest "json" format version. Other formats
 # ignore this flag.
