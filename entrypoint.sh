@@ -42,48 +42,48 @@ fi
 
 # Split the controls by comma and concatenate with quotes around each control
 if [ -n "$INPUT_CONTROLS" ]; then
-    CONTROLS=""
+    controls=""
     set -f; IFS=','
     set -- "${INPUT_CONTROLS}"
     set +f; unset IFS
     for control in "$@"
     do
         control=$(echo "${control}" | xargs) # Remove leading/trailing whitespaces
-        CONTROLS="$CONTROLS\"$control\","
+        controls="$controls\"$control\","
     done
-    CONTROLS=$(echo "${CONTROLS%?}")
+    controls=$(echo "${controls%?}")
 fi
 
 # Subcommands
-ARTIFACTS_PATH="/home/ks/.kubescape"
-FRAMEWORKS_CMD=$([ -n "$INPUT_FRAMEWORKS" ] && echo "framework $INPUT_FRAMEWORKS" || echo "")
-CONTROLS_CMD=$([ -n "$INPUT_CONTROLS" ] && echo control "${CONTROLS}" || echo "")
+artifacts_path="/home/ks/.kubescape"
+frameworks_cmd=$([ -n "$INPUT_FRAMEWORKS" ] && echo "framework $INPUT_FRAMEWORKS" || echo "")
+controls_cmd=$([ -n "$INPUT_CONTROLS" ] && echo control "${controls}" || echo "")
 
 # Files to scan
-FILES=$([ -n "$INPUT_FILES" ] && echo "$INPUT_FILES" || echo .)
+files=$([ -n "$INPUT_FILES" ] && echo "$INPUT_FILES" || echo .)
 
 # Output file name
-OUTPUT_FILE=$([ -n "$INPUT_OUTPUTFILE" ] && echo "$INPUT_OUTPUTFILE" || echo "results")
+output_file=$([ -n "$INPUT_OUTPUTFILE" ] && echo "$INPUT_OUTPUTFILE" || echo "results")
 
 # Command-line options
-ACCOUNT_OPT=$([ -n "$INPUT_ACCOUNT" ] && echo --account "${INPUT_ACCOUNT}" || echo "")
+account_opt=$([ -n "$INPUT_ACCOUNT" ] && echo --account "${INPUT_ACCOUNT}" || echo "")
 
 # If account ID is empty, we load artifacts from the local path, otherwise we
 # load from the cloud (this will enable custom framework support)
-ARTIFACTS=$([ -n "$INPUT_ACCOUNT" ] && echo "" || echo --use-artifacts-from "${ARTIFACTS_PATH}")
+artifacts=$([ -n "$INPUT_ACCOUNT" ] && echo "" || echo --use-artifacts-from "${artifacts_path}")
 
-FAIL_THRESHOLD_OPT=$([ -n "$INPUT_FAILEDTHRESHOLD" ] && echo --fail-threshold "${INPUT_FAILEDTHRESHOLD}" || echo "")
-SEVERITY_THRESHOLD_OPT=$([ -n "$INPUT_SEVERITYTHRESHOLD" ] && echo --severity-threshold "${INPUT_SEVERITYTHRESHOLD}" || echo "")
+fail_threshold_opt=$([ -n "$INPUT_FAILEDTHRESHOLD" ] && echo --fail-threshold "${INPUT_FAILEDTHRESHOLD}" || echo "")
+severity_threshold_opt=$([ -n "$INPUT_SEVERITYTHRESHOLD" ] && echo --severity-threshold "${INPUT_SEVERITYTHRESHOLD}" || echo "")
 
 # `kubescape fix` requires the latest "json" format version. Other formats
 # ignore this flag.
 format_version_opt="--format-version v2"
 
-SCAN_COMMAND="kubescape scan $FRAMEWORKS_CMD $CONTROLS_CMD $FILES $ACCOUNT_OPT $FAIL_THRESHOLD_OPT $SEVERITY_THRESHOLD_OPT --format $INPUT_FORMAT $format_version_opt --output $OUTPUT_FILE"
+scan_command="kubescape scan $frameworks_cmd $controls_cmd $files $account_opt $fail_threshold_opt $severity_threshold_opt --format $INPUT_FORMAT $format_version_opt --output $output_file"
 
-eval "${SCAN_COMMAND}"
+eval "${scan_command}"
 
 if [ "$should_fix_files" = "true" ]; then
-    fix_command="yes | kubescape fix $OUTPUT_FILE.json"
+    fix_command="yes | kubescape fix ${output_file}.json"
     eval "${fix_command}"
 fi
