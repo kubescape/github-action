@@ -7,6 +7,8 @@ You need to make sure that workflows have [Read and write permissions](https://d
 
 ## Usage
 
+### Scanning with Kubescape
+
 To scan your repository with [Kubescape in your Github workflow](https://www.armosec.io/blog/kubescape-now-integrates-with-github-actions/?utm_source=github&utm_medium=repository), add the following steps to your workflow configuration:
 
 ```yaml
@@ -34,6 +36,46 @@ jobs:
 
 This workflow definition scans your repository with Kubescape and publishes the results to Github.
 You can then see the results in the Pull Request that triggered the scan and the _Security → Code scanning_ tab.
+
+### Automatically Suggest Fixes
+
+To make Kubescape automatically suggest fixes to your pushes and pull requests, use the following workflow:
+
+```yaml
+name: Suggest autofixes with Kubescape
+on: [push,pull_request]
+jobs:
+  kubescape:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v14.6
+    - uses: kubescape/github-action@main
+      with:
+        account: ${{secrets.KUBESCAPE_ACCOUNT}}
+        files: ${{ steps.changed-files.outputs.all_changed_files }}
+        fixFiles: true
+        format: "sarif"
+    - uses: peter-evans/create-pull-request@v4
+      with:
+        add-paths: |
+          *.yaml
+        commit-message: "chore: fix K8s misconfigurations"
+        title: "[Kubescape] chore: fix K8s misconfigurations"
+        body: |
+          # What this PR changes
+
+          [Kubescape](https://github.com/kubescape/kubescape) has found misconfigurations in the targeted branch. This PR fixes the misconfigurations that have automatic fixes available.
+
+          You may still need to fix misconfigurations that do not have automatic fixes.
+        base: ${{ github.head_ref }}
+        branch: kubescape-auto-fix-${{ github.head_ref || github.ref_name }}
+        delete-branch: true
+```
 
 ## Inputs
 
