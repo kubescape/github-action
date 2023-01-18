@@ -1,50 +1,96 @@
 #!/bin/sh
 
+# Checks if `string` contains `substring`.
+#
+# Arguments:
+#   String to check.
+#
+# Returns:
+#   0 if `string` contains `substring`, otherwise 1.
+contains() {
+    case "$1" in
+        *$2*) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
 set -e
 
-# Declear ks client  
+# Kubescape uses the client name to make a request for checking for updates
 export KS_CLIENT="github_actions"
 
-if [ ! -z "$INPUT_FRAMEWORKS" ] && [ ! -z "$INPUT_CONTROLS" ]; then
-echo "Framework and Control is specified. Please specify either one of them or neither"
-exit 1
+if [ -n "${INPUT_FRAMEWORKS}" ] && [ -n "${INPUT_CONTROLS}" ]; then
+    echo "Framework and Control is specified. Please specify either one of them or neither"
+    exit 1
 fi
 
 # Split the controls by comma and concatenate with quotes around each control
-if [ ! -z "$INPUT_CONTROLS" ]; then
-    CONTROLS=""
+if [ -n "${INPUT_CONTROLS}" ]; then
+    controls=""
     set -f; IFS=','
-    set -- $INPUT_CONTROLS
+    set -- "${INPUT_CONTROLS}"
     set +f; unset IFS
     for control in "$@"
     do
-        control=$(echo $control | xargs) # Remove leading/trailing whitespaces
-        CONTROLS="$CONTROLS\"$control\","
+        control=$(echo "${control}" | xargs) # Remove leading/trailing whitespaces
+        controls="${controls}\"${control}\","
     done
-    CONTROLS=$(echo "${CONTROLS%?}")
+    controls=$(echo "${controls%?}")
 fi
 
-# Subcommands
-ARTIFACTS_PATH="/home/ks/.kubescape"
-FRAMEWORKS_CMD=$([ ! -z "$INPUT_FRAMEWORKS" ] && echo "framework $INPUT_FRAMEWORKS" || echo "")
-CONTROLS_CMD=$([ ! -z "$INPUT_CONTROLS" ] && echo control $CONTROLS || echo "")
+frameworks_cmd=$([ -n "${INPUT_FRAMEWORKS}" ] && echo "framework ${INPUT_FRAMEWORKS}" || echo "")
+controls_cmd=$([ -n "${INPUT_CONTROLS}" ] && echo control "${controls}" || echo "")
 
-# Files to scan
-FILES=$([ ! -z "$INPUT_FILES" ] && echo "$INPUT_FILES" || echo .)
+files=$([ -n "${INPUT_FILES}" ] && echo "${INPUT_FILES}" || echo .)
 
-# Output file name
-OUTPUT_FILE=$([ ! -z "$INPUT_OUTPUTFILE" ] && echo "$INPUT_OUTPUTFILE" || echo "results.out")
+output_formats="${INPUT_FORMAT}"
+have_json_format="false"
+if [ -n "${output_formats}" ] && contains "${output_formats}" "json"; then
+    have_json_format="true"
+fi
 
-# Command-line options
-ACCOUNT_OPT=$([ ! -z "$INPUT_ACCOUNT" ] && echo --account $INPUT_ACCOUNT || echo "")
+should_fix_files="false"
+if [ "${INPUT_FIXFILES}" = "true" ]; then
+    should_fix_files="true"
+fi
 
-# If account ID is empty, we load artifacts from the local path, otherwise we load from the cloud (this will enable custom framework support)
-ARTIFACTS=$([ ! -z "$INPUT_ACCOUNT" ] && echo "" || echo --use-artifacts-from $ARTIFACTS_PATH)
+# If a user requested Kubescape to fix their files, but forgot to ask for JSON
+# output, do it for them
+if [ "${should_fix_files}" = "true" ] && [ "${have_json_format}" != "true" ]; then
+    output_formats="${output_formats},json"
+fi
 
-FAIL_THRESHOLD_OPT=$([ ! -z "$INPUT_FAILEDTHRESHOLD" ] && echo --fail-threshold $INPUT_FAILEDTHRESHOLD || echo "")
-SEVERITY_THRESHOLD_OPT=$([ ! -z "$INPUT_SEVERITYTHRESHOLD" ] && echo --severity-threshold $INPUT_SEVERITYTHRESHOLD || echo "")
+output_file=$([ -n "${INPUT_OUTPUTFILE}" ] && echo "${INPUT_OUTPUTFILE}" || echo "results")
 
-COMMAND="kubescape scan $FRAMEWORKS_CMD $CONTROLS_CMD $FILES $ACCOUNT_OPT $FAIL_THRESHOLD_OPT $SEVERITY_THRESHOLD_OPT --format $INPUT_FORMAT --output $OUTPUT_FILE $ARTIFACTS"
+account_opt=$([ -n "${INPUT_ACCOUNT}" ] && echo --account "${INPUT_ACCOUNT}" || echo "")
 
-eval $COMMAND
+# If account ID is empty, we load artifacts from the local path, otherwise we
+# load from the cloud (this will enable custom framework support)
+artifacts_path="/home/ks/.kubescape"
+artifacts_opt=$([ -n "${INPUT_ACCOUNT}" ] && echo "" || echo --use-artifacts-from "${artifacts_path}")
 
+fail_threshold_opt=$([ -n "${INPUT_FAILEDTHRESHOLD}" ] && echo --fail-threshold "${INPUT_FAILEDTHRESHOLD}" || echo "")
+
+# When a user requests to fix files, the action should not fail because the
+# results exceed severity. This is subject to change in the future.
+severity_threshold_opt=$(\
+	[ -n "${INPUT_SEVERITYTHRESHOLD}" ] \
+	&& [ "${should_fix_files}" = "false" ] \
+	&& echo --severity-threshold "${INPUT_SEVERITYTHRESHOLD}" \
+	|| echo "" \
+)
+
+# The `kubescape fix` subcommand requires the latest "json" format version.
+# Other formats ignore this flag.
+format_version_opt="--format-version v2"
+
+# TODO: include artifacts_opt once https://github.com/kubescape/kubescape/issues/1040 is resolved
+scan_command="kubescape scan ${frameworks_cmd} ${controls_cmd} ${files} ${account_opt} ${fail_threshold_opt} ${severity_threshold_opt} --format ${output_formats} ${format_version_opt} --output ${output_file}"
+
+echo "${scan_command}"
+eval "${scan_command}"
+
+if [ "$should_fix_files" = "true" ]; then
+    fix_command="kubescape fix --no-confirm ${output_file}.json"
+    eval "${fix_command}"
+fi
