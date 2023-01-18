@@ -67,7 +67,7 @@ account_opt=$([ -n "${INPUT_ACCOUNT}" ] && echo --account "${INPUT_ACCOUNT}" || 
 # If account ID is empty, we load artifacts from the local path, otherwise we
 # load from the cloud (this will enable custom framework support)
 artifacts_path="/home/ks/.kubescape"
-artifacts=$([ -n "${INPUT_ACCOUNT}" ] && echo "" || echo --use-artifacts-from "${artifacts_path}")
+artifacts_opt=$([ -n "${INPUT_ACCOUNT}" ] && echo "" || echo --use-artifacts-from "${artifacts_path}")
 
 fail_threshold_opt=$([ -n "${INPUT_FAILEDTHRESHOLD}" ] && echo --fail-threshold "${INPUT_FAILEDTHRESHOLD}" || echo "")
 
@@ -84,6 +84,7 @@ severity_threshold_opt=$(\
 # Other formats ignore this flag.
 format_version_opt="--format-version v2"
 
+# TODO: include artifacts_opt once https://github.com/kubescape/kubescape/issues/1040 is resolved
 scan_command="kubescape scan ${frameworks_cmd} ${controls_cmd} ${files} ${account_opt} ${fail_threshold_opt} ${severity_threshold_opt} --format ${output_formats} ${format_version_opt} --output ${output_file}"
 
 echo "${scan_command}"
