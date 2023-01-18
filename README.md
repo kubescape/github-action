@@ -23,7 +23,7 @@ jobs:
       continue-on-error: true
       with:
         format: sarif
-        outputFile: results.sarif
+        outputFile: results
         # # Optional: Specify the Kubescape cloud account ID
         # account: ${{secrets.KUBESCAPE_ACCOUNT}}
         # # Optional: Scan a specific path. Default will scan the whole repository
@@ -82,7 +82,7 @@ jobs:
 | Name | Description | Required |
 | --- | --- | ---|
 | files | YAML files or Helm charts to scan for misconfigurations. The files need to be provided with the complete path from the root of the repository. | No (default is `.` which scans the whole repository) |
-| outputFile | Name of the output file where the scan result will be stored. | No (default is `results.out`) |
+| outputFile | Name of the output file where the scan result will be stored without the extension. | No (default is `results`) |
 | frameworks | Security framework(s) to scan the files against. Multiple frameworks can be specified separated by a comma with no spaces. Example - `nsa,devopsbest`. Run `kubescape list frameworks` in the [Kubescape CLI](https://hub.armo.cloud/docs/installing-kubescape) to get a list of all frameworks. Either frameworks have to be specified or controls. | No |
 | controls | Security control(s) to scan the files against. Multiple controls can be specified separated by a comma with no spaces. Example - `Configured liveness probe,Pods in default namespace`. Run `kubescape list controls` in the [Kubescape CLI](https://hub.armo.cloud/docs/installing-kubescape) to get a list of all controls. You can use either the complete control name or the control ID such as `C-0001` to specify the control you want use. You must specify either the control(s) or the framework(s) you want used in the scan. | No |
 | account | Account ID for [Kubescape cloud](https://cloud.armosec.io/). Used for custom configuration, such as frameworks, control configuration, etc. | No |
@@ -106,7 +106,7 @@ jobs:
       continue-on-error: true
       with:
         format: sarif
-        outputFile: results.sarif
+        outputFile: results
         # Specify the Kubescape cloud account ID
         account: ${{secrets.KUBESCAPE_ACCOUNT}}
     - name: Upload Kubescape scan results to Github Code Scanning
@@ -131,7 +131,7 @@ jobs:
       continue-on-error: true
       with:
         format: sarif
-        outputFile: results.sarif
+        outputFile: results
         # Scan a specific path. Default will scan the whole repository
         files: "examples/kubernetes-manifests/*.yaml"
     - name: Upload Kubescape scan results to Github Code Scanning
@@ -156,7 +156,7 @@ jobs:
         continue-on-error: true
         with:
           format: sarif
-          outputFile: results.sarif
+          outputFile: results
           frameworks: |
             nsa,mitre
       - name: Upload Kubescape scan results to Github Code Scanning
@@ -181,7 +181,7 @@ jobs:
         continue-on-error: false
         with:
           format: sarif
-          outputFile: results.sarif
+          outputFile: results
           failedThreshold: 50
       - name: Upload Kubescape scan results to Github Code Scanning
         uses: github/codeql-action/upload-sarif@v2
@@ -204,7 +204,7 @@ jobs:
         continue-on-error: false
         with:
           format: sarif
-          outputFile: results.sarif
+          outputFile: results
           severityThreshold: medium
       - name: Upload Kubescape scan results to Github Code Scanning
         uses: github/codeql-action/upload-sarif@v2
