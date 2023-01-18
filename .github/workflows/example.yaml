@@ -22,7 +22,7 @@ jobs:
 ---
 
 name: Suggest autofixes with Kubescape
-on: [push,pull_request]
+on: [pull_request]
 jobs:
   kubescape:
     runs-on: ubuntu-latest
