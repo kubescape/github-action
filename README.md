@@ -77,6 +77,10 @@ jobs:
         delete-branch: true
 ```
 
+Please note that since Kubescape provides automatic fixes only to the rendered YAML manifests, the workflow above will not produce correct fixes for Helm charts.
+
+The next important thing to note is that Kubescape only fixes the files. It does not open pull requests on its own. In the example above, a separate step that runs a different action opens the appropriate pull request. Due to how Github works, there are [limitations](https://github.com/peter-evans/create-pull-request/blob/main/docs/concepts-guidelines.md#triggering-further-workflow-runs) on running and opening pull requests to forks. The action running in this step is maintained by its respective maintainers, and not the Kubescape team, so you should review its documentation when troubleshooting the process of triggering the workflow run and opening pull requests.
+
 ## Inputs
 
 | Name | Description | Required |
