@@ -43,7 +43,7 @@ To make Kubescape automatically suggest fixes to your pushes and pull requests, 
 
 ```yaml
 name: Suggest autofixes with Kubescape
-on: [push,pull_request]
+on: [pull_request]
 jobs:
   kubescape:
     runs-on: ubuntu-latest
