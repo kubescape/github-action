@@ -3,7 +3,7 @@ description: Run Kubescape scan
 inputs:
   failedThreshold:
     description: |
-      Failure threshold is the percent above which the command fails and 
+      Failure threshold is the percent above which the command fails and
       returns exit code 1 (default 0 i.e, action fails if any control fails)
     required: false
   severityThreshold:
@@ -26,16 +26,20 @@ inputs:
       Kubescape adds the appropriate extension automatically to support both
       single and multiple output formats.
     required: false
+  verbose:
+    description: |
+      Display all of the input resources and not only failed resources
+    required: false
   frameworks:
     description: |
-      List of all frameworks to scan. Run kubescape list frameworks with 
-      the Kubescape CLI to get a list of all frameworks. Either frameworks 
+      List of all frameworks to scan. Run kubescape list frameworks with
+      the Kubescape CLI to get a list of all frameworks. Either frameworks
       have to be specified or controls.
     required: false
   controls:
     description: |
-      List of all controls to scan. Run kubescape list controls with the 
-      Kubescape CLI to get a list of all controls. Either frameworks 
+      List of all controls to scan. Run kubescape list controls with the
+      Kubescape CLI to get a list of all controls. Either frameworks
       have to be specified or controls.
     required: false
   account:
