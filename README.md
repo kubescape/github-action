@@ -39,18 +39,31 @@ You can then see the results in the Pull Request that triggered the scan and the
 
 ### Automatically Suggest Fixes
 
-To make Kubescape automatically suggest fixes to your pushes and pull requests, use the following workflow:
+To make Kubescape automatically suggest fixes to your pushes (by opening new PRs) and pull requests (by code review), use the following workflow:
 
 ```yaml
 name: Suggest autofixes with Kubescape
-on: [pull_request]
+on: [push, pull_request_target]
+
 jobs:
   kubescape:
     runs-on: ubuntu-latest
+    permissions:
+      # Needed only for "push" events
+      contents: write
+      # Needed for both "push" and "pull_request_target" events
+      pull-requests: write
+
     steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
+    - uses: actions/checkout@v3
+      if: github.event_name == 'pull_request_target'
+      with:
+        fetch-depth: 0
+        ref: ${{github.event.pull_request.head.ref}}
+        repository: ${{github.event.pull_request.head.repo.full_name}}
     - name: Get changed files
       id: changed-files
       uses: tj-actions/changed-files@v14.6
@@ -61,6 +74,9 @@ jobs:
         fixFiles: true
         format: "sarif"
     - uses: peter-evans/create-pull-request@v4
+      # Remember to allow GitHub Actions to create and approve pull requests
+      # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#preventing-github-actions-from-creating-or-approving-pull-requests
+      if: github.event_name != 'pull_request_target'
       with:
         add-paths: |
           *.yaml
@@ -75,6 +91,11 @@ jobs:
         base: ${{ github.head_ref }}
         branch: kubescape-auto-fix-${{ github.head_ref || github.ref_name }}
         delete-branch: true
+    - name: PR Suggester
+      if: github.event_name == 'pull_request_target'
+      uses: reviewdog/action-suggester@v1
+      with:
+        tool_name: Kubescape
 ```
 
 Please note that since Kubescape provides automatic fixes only to the rendered YAML manifests, the workflow above will not produce correct fixes for Helm charts.
