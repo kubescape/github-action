@@ -66,7 +66,7 @@ jobs:
         repository: ${{github.event.pull_request.head.repo.full_name}}
     - name: Get changed files
       id: changed-files
-      uses: tj-actions/changed-files@v14.6
+      uses: tj-actions/changed-files@v35
     - uses: kubescape/github-action@main
       with:
         account: ${{secrets.KUBESCAPE_ACCOUNT}}
@@ -91,11 +91,24 @@ jobs:
         base: ${{ github.head_ref }}
         branch: kubescape-auto-fix-${{ github.head_ref || github.ref_name }}
         delete-branch: true
+    # # Alternatively, you can use reviewdog to replace the code-suggester below
+    # - name: PR Suggester
+    #   if: github.event_name == 'pull_request_target'
+    #   uses: reviewdog/action-suggester@v1
+    #   with:
+    #     tool_name: Kubescape
+    - name: Clean up kubescape output
+      if: github.event_name == 'pull_request_target'
+      run: rm -f results.json results.sarif
     - name: PR Suggester
       if: github.event_name == 'pull_request_target'
-      uses: reviewdog/action-suggester@v1
+      uses: googleapis/code-suggester@v2
+      env:
+        ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tool_name: Kubescape
+        command: review
+        pull_number: ${{ github.event.pull_request.number }}
+        git_dir: '.'
 ```
 
 Please note that since Kubescape provides automatic fixes only to the rendered YAML manifests, the workflow above will not produce correct fixes for Helm charts.
