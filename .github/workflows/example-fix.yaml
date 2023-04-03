@@ -1,0 +1,66 @@
+name: Suggest autofixes with Kubescape
+on: [push, pull_request_target]
+
+jobs:
+  kubescape-fix:
+    runs-on: ubuntu-latest
+    permissions:
+      # Needed only for "push" events
+      contents: write
+      # Needed for both "push" and "pull_request_target" events
+      pull-requests: write
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - uses: actions/checkout@v3
+      if: github.event_name == 'pull_request_target'
+      with:
+        fetch-depth: 0
+        ref: ${{github.event.pull_request.head.ref}}
+        repository: ${{github.event.pull_request.head.repo.full_name}}
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v35
+    - uses: kubescape/github-action@main
+      with:
+        files: ${{ steps.changed-files.outputs.all_changed_files }}
+        fixFiles: true
+        format: "sarif"
+    - uses: peter-evans/create-pull-request@v4
+      # Remember to allow GitHub Actions to create and approve pull requests
+      # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#preventing-github-actions-from-creating-or-approving-pull-requests
+      if: github.event_name != 'pull_request_target'
+      with:
+        add-paths: |
+          *.yaml
+        commit-message: "chore: fix K8s misconfigurations"
+        title: "[Kubescape] chore: fix K8s misconfigurations"
+        body: |
+          # What this PR changes
+
+          [Kubescape](https://github.com/kubescape/kubescape) has found misconfigurations in the targeted branch. This PR fixes the misconfigurations that have automatic fixes available.
+
+          You may still need to fix misconfigurations that do not have automatic fixes.
+        base: ${{ github.head_ref }}
+        branch: kubescape-auto-fix-${{ github.head_ref || github.ref_name }}
+        delete-branch: true
+    # # Alternatively, you can use reviewdog to replace the code-suggester
+    # - name: PR Suggester
+    #   if: github.event_name == 'pull_request_target'
+    #   uses: reviewdog/action-suggester@v1
+    #   with:
+    #     tool_name: Kubescape
+    - name: Clean up kubescape output
+      if: github.event_name == 'pull_request_target'
+      run: rm results.json results.sarif
+    - name: PR Suggester
+      if: github.event_name == 'pull_request_target'
+      uses: googleapis/code-suggester@v2
+      env:
+        ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        command: review
+        pull_number: ${{ github.event.pull_request.number }}
+        git_dir: '.'
