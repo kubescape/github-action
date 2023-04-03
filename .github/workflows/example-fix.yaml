@@ -1,5 +1,8 @@
 name: Suggest autofixes with Kubescape
-on: [push, pull_request_target]
+on: 
+  push:
+    branches: [ main ]
+  pull_request_target:
 
 jobs:
   kubescape-fix:
@@ -25,6 +28,7 @@ jobs:
       uses: tj-actions/changed-files@v35
     - uses: kubescape/github-action@main
       with:
+        account: ${{secrets.KUBESCAPE_ACCOUNT}}
         files: ${{ steps.changed-files.outputs.all_changed_files }}
         fixFiles: true
         format: "sarif"
@@ -46,21 +50,21 @@ jobs:
         base: ${{ github.head_ref }}
         branch: kubescape-auto-fix-${{ github.head_ref || github.ref_name }}
         delete-branch: true
-    # # Alternatively, you can use reviewdog to replace the code-suggester
+    # # Alternatively, you can use googleapis/code-suggester to replace the reviewdog below
+    # - name: Clean up kubescape output
+    #   if: github.event_name == 'pull_request_target'
+    #   run: rm -f results.json results.sarif
     # - name: PR Suggester
     #   if: github.event_name == 'pull_request_target'
-    #   uses: reviewdog/action-suggester@v1
+    #   uses: googleapis/code-suggester@v2
+    #   env:
+    #     ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     #   with:
-    #     tool_name: Kubescape
-    - name: Clean up kubescape output
-      if: github.event_name == 'pull_request_target'
-      run: rm results.json results.sarif
+    #     command: review
+    #     pull_number: ${{ github.event.pull_request.number }}
+    #     git_dir: '.'
     - name: PR Suggester
       if: github.event_name == 'pull_request_target'
-      uses: googleapis/code-suggester@v2
-      env:
-        ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: reviewdog/action-suggester@v1
       with:
-        command: review
-        pull_number: ${{ github.event.pull_request.number }}
-        git_dir: '.'
+        tool_name: Kubescape

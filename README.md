@@ -39,14 +39,17 @@ You can then see the results in the Pull Request that triggered the scan and the
 
 ### Automatically Suggest Fixes
 
-To make Kubescape automatically suggest fixes to your pushes (by opening new PRs) and pull requests (by code review), use the following workflow:
+To make Kubescape automatically suggest fixes to your pushes to your main branch (by opening new PRs) and pull requests (by code review), use the following workflow:
 
 ```yaml
 name: Suggest autofixes with Kubescape
-on: [push, pull_request_target]
+on: 
+  push:
+    branches: [ main ]
+  pull_request_target:
 
 jobs:
-  kubescape:
+  kubescape-fix:
     runs-on: ubuntu-latest
     permissions:
       # Needed only for "push" events
@@ -91,24 +94,24 @@ jobs:
         base: ${{ github.head_ref }}
         branch: kubescape-auto-fix-${{ github.head_ref || github.ref_name }}
         delete-branch: true
-    # # Alternatively, you can use reviewdog to replace the code-suggester below
+    # # Alternatively, you can use googleapis/code-suggester to replace the reviewdog below
+    # - name: Clean up kubescape output
+    #   if: github.event_name == 'pull_request_target'
+    #   run: rm -f results.json results.sarif
     # - name: PR Suggester
     #   if: github.event_name == 'pull_request_target'
-    #   uses: reviewdog/action-suggester@v1
+    #   uses: googleapis/code-suggester@v2
+    #   env:
+    #     ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     #   with:
-    #     tool_name: Kubescape
-    - name: Clean up kubescape output
-      if: github.event_name == 'pull_request_target'
-      run: rm -f results.json results.sarif
+    #     command: review
+    #     pull_number: ${{ github.event.pull_request.number }}
+    #     git_dir: '.'
     - name: PR Suggester
       if: github.event_name == 'pull_request_target'
-      uses: googleapis/code-suggester@v2
-      env:
-        ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: reviewdog/action-suggester@v1
       with:
-        command: review
-        pull_number: ${{ github.event.pull_request.number }}
-        git_dir: '.'
+        tool_name: Kubescape
 ```
 
 Please note that since Kubescape provides automatic fixes only to the rendered YAML manifests, the workflow above will not produce correct fixes for Helm charts.
