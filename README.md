@@ -130,6 +130,7 @@ The next important thing to note is that Kubescape only fixes the files. It does
 | failedThreshold | Failure threshold is the percent above which the command fails and returns exit code 1 (default 0 i.e, action fails if any control fails) | No (default 0) |
 | severityThreshold | Severity threshold is the severity of a failed control at or above which the command terminates with an exit code 1 (default is `high`, i.e. the action fails if any High severity control fails) | No |
 | verbose | Display all of the input resources and not only failed resources. Default is off | No |
+| exceptions | The JSON file containing at least one resource and one policy. Refer [exceptions](https://hub.armo.cloud/docs/exceptions) docs for more info. Objects with exceptions will be presented as exclude and not fail. | No |
 
 ## Examples
 

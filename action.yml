@@ -47,6 +47,10 @@ inputs:
       Account ID for the Kubescape SaaS.
       Used for custom configuration, such as frameworks, control configuration, etc.
     required: false
+  exceptions:
+    description: |
+      Path to the json file containing exceptions.
+    required: false
   format:
     description: |
       Output format.
