@@ -60,9 +60,9 @@ if [ -n "$INPUT_EXCEPTIONS" ]; then
   exceptions="--exceptions ${INPUT_EXCEPTIONS}"
 fi
 
-controls-config=""
+controls_config=""
 if [ -n "$INPUT_CONTROLSCONFIG" ]; then
-  controls-config="--controls-config ${INPUT_CONTROLSCONFIG}"
+  controls_config="--controls-config ${INPUT_CONTROLSCONFIG}"
 fi
 
 should_fix_files="false"
