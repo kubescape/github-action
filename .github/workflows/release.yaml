@@ -1,0 +1,37 @@
+name: Release with upstream
+
+on:
+  workflow_dispatch:  # Allow manual triggers
+  push:
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
+
+env:
+  BOT_NAME: "github-actions[bot]"
+  BOT_EMAIL: "github-actions[bot]@users.noreply.github.com"
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to release, commit and push the changed files back to the repository.
+      contents: write
+    steps:
+    - uses: actions/checkout@v3
+    - name: Update repo
+      run: |
+        . ./update.sh
+        echo "latest=${LATEST}" >> $GITHUB_ENV
+        echo "current=${CURRENT}" >> $GITHUB_ENV
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      if: env.latest != env.current
+      with:
+        commit_author: "${{ env.BOT_NAME }} <${{ env.BOT_EMAIL }}>"
+        commit_message: Bump kubescape version into ${{ env.latest }}
+    - name: Release
+      if: env.latest != env.current
+      uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
+      with:
+        tag_name: ${{ env.latest }}
+        body: Bump kubescape version into ${{ env.latest }}
