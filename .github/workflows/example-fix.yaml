@@ -15,6 +15,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      if: github.event_name != 'pull_request_target'
       with:
         fetch-depth: 0
     - uses: actions/checkout@v3
@@ -32,6 +33,13 @@ jobs:
         files: ${{ steps.changed-files.outputs.all_changed_files }}
         fixFiles: true
         format: "sarif"
+    # Use HollowMan6/sarif4reviewdog to support SARIF format for reviewdog
+    - name: PR Suggester by SARIF file
+      if: github.event_name == 'pull_request_target'
+      uses: HollowMan6/sarif4reviewdog@v1.0.0
+      with:
+        file: 'results.sarif'
+        level: warning
     - uses: peter-evans/create-pull-request@v4
       # Remember to allow GitHub Actions to create and approve pull requests
       # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#preventing-github-actions-from-creating-or-approving-pull-requests
