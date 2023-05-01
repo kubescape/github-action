@@ -60,6 +60,11 @@ if [ -n "$INPUT_EXCEPTIONS" ]; then
   exceptions="--exceptions ${INPUT_EXCEPTIONS}"
 fi
 
+controls_config=""
+if [ -n "$INPUT_CONTROLSCONFIG" ]; then
+  controls_config="--controls-config ${INPUT_CONTROLSCONFIG}"
+fi
+
 should_fix_files="false"
 if [ "${INPUT_FIXFILES}" = "true" ]; then
   should_fix_files="true"
@@ -96,7 +101,7 @@ severity_threshold_opt=$(
 format_version_opt="--format-version v2"
 
 # TODO: include artifacts_opt once https://github.com/kubescape/kubescape/issues/1040 is resolved
-scan_command="kubescape scan ${frameworks_cmd} ${controls_cmd} ${files} ${account_opt} ${fail_threshold_opt} ${severity_threshold_opt} --format ${output_formats} ${format_version_opt} --output ${output_file} ${verbose} ${exceptions}"
+scan_command="kubescape scan ${frameworks_cmd} ${controls_cmd} ${files} ${account_opt} ${fail_threshold_opt} ${severity_threshold_opt} --format ${output_formats} ${format_version_opt} --output ${output_file} ${verbose} ${exceptions} ${controls-config}"
 
 echo "${scan_command}"
 eval "${scan_command}"

@@ -42,6 +42,10 @@ inputs:
       Kubescape CLI to get a list of all controls. Either frameworks
       have to be specified or controls.
     required: false
+  controlsConfig:
+    description: |
+      Path to the file containing controls configuration.
+    required: false
   account:
     description: |
       Account ID for the Kubescape SaaS.
