@@ -1,11 +1,9 @@
-name: Release with upstream
+name: Check release with upstream
 
 on:
   workflow_dispatch:  # Allow manual triggers
   push:
-    # Publish `v1.2.3` tags as releases.
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+    branches: [ main ]
 
 env:
   BOT_NAME: "github-actions[bot]"
@@ -15,8 +13,8 @@ jobs:
   update:
     runs-on: ubuntu-latest
     permissions:
-      # Give the default GITHUB_TOKEN write permission to release, commit and push the changed files back to the repository.
       contents: write
+      pull-requests: write
     steps:
     - uses: actions/checkout@v3
     - name: Update repo
@@ -24,14 +22,26 @@ jobs:
         . ./update.sh
         echo "latest=${LATEST}" >> $GITHUB_ENV
         echo "current=${CURRENT}" >> $GITHUB_ENV
-    - uses: stefanzweifel/git-auto-commit-action@v4
+        git clone https://github.com/${{ github.repository }} github-action; cd github-action
+        export RELEASE=$(git for-each-ref --format="%(refname:short)" --sort=-authordate --count=1 refs/tags || true)
+        rm -rf github-action
+        echo "release=${RELEASE}" >> $GITHUB_ENV
+    - uses: peter-evans/create-pull-request@v4
       if: env.latest != env.current
       with:
-        commit_author: "${{ env.BOT_NAME }} <${{ env.BOT_EMAIL }}>"
-        commit_message: Bump kubescape version into ${{ env.latest }}
+        add-paths: |
+          Dockerfile
+        commit-message: "Bump kubescape version into ${{ env.latest }}"
+        title: "[Kubescape] Bump kubescape version into ${{ env.latest }}"
+        body: |
+          # Overview
+          This PR bumps the kubescape version used in this action Docker image to the latest: ${{ env.latest }}
+        base: ${{ github.head_ref }}
+        branch: kubescape-bump-${{ env.latest }}-${{ github.head_ref || github.ref_name }}
+        delete-branch: true
     - name: Release
-      if: env.latest != env.current
+      if: env.release != env.current
       uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
       with:
-        tag_name: ${{ env.latest }}
-        body: Bump kubescape version into ${{ env.latest }}
+        tag_name: ${{ env.current }}
+        body: Bump kubescape version into ${{ env.current }}
