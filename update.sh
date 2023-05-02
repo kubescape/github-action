@@ -1,6 +1,6 @@
 git clone https://github.com/kubescape/kubescape.git --no-checkout
 cd kubescape
-export LATEST=$(git describe --tags --abbrev=0)
+export LATEST=$(git for-each-ref --format="%(refname:short)" --sort=-authordate --count=1 refs/tags)
 cd ..
 rm -rf kubescape
 export CURRENT=$(cat Dockerfile | head -n1 | cut -d':' -f2)
