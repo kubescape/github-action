@@ -40,31 +40,21 @@ You can then see the results in the Pull Request that triggered the scan and the
 
 ### Automatically Suggest Fixes
 
-To make Kubescape automatically suggest fixes to your pushes to your main branch (by opening new PRs) and pull requests (by code review), use the following workflow:
+To make Kubescape automatically suggest fixes to your pull requests by code review, use the following workflow:
 
 ```yaml
-name: Suggest autofixes with Kubescape
-on: 
-  push:
-    branches: [ main ]
+name: Suggest autofixes with Kubescape for PR by reviews
+on:
   pull_request_target:
 
 jobs:
-  kubescape-fix:
+  kubescape-fix-pr-reviews:
     runs-on: ubuntu-latest
     permissions:
-      # Needed only for "push" events
-      contents: write
-      # Needed for both "push" and "pull_request_target" events
       pull-requests: write
 
     steps:
     - uses: actions/checkout@v3
-      if: github.event_name != 'pull_request_target'
-      with:
-        fetch-depth: 0
-    - uses: actions/checkout@v3
-      if: github.event_name == 'pull_request_target'
       with:
         fetch-depth: 0
         ref: ${{github.event.pull_request.head.ref}}
@@ -78,13 +68,44 @@ jobs:
         files: ${{ steps.changed-files.outputs.all_changed_files }}
         fixFiles: true
         format: "sarif"
-    # # Use HollowMan6/sarif4reviewdog to support SARIF format for reviewdog
-    # - name: PR Suggester by SARIF file
-    #   if: github.event_name == 'pull_request_target'
-    #   uses: HollowMan6/sarif4reviewdog@v1.0.0
-    #   with:
-    #     file: 'results.sarif'
-    #     level: warning
+    - name: PR Suggester according to SARIF file
+      if: github.event_name == 'pull_request_target'
+      uses: HollowMan6/sarif4reviewdog@v1.0.0
+      with:
+        file: 'results.sarif'
+        level: warning
+```
+
+The above workflow works by collecting the [SARIF (Static Analysis Results Interchange Format)](https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=sarif) file that kubescape generates. Then, with the help of [HollowMan6/sarif4reviewdog](https://github.com/marketplace/actions/sarif-support-for-reviewdog), convert the SARIF file into [RDFormat (Reviewdog Diagnostic Format)](https://github.com/reviewdog/reviewdog/tree/master/proto/rdf) and generate reviews using [Reviewdog](https://github.com/reviewdog/reviewdog).
+
+You can also make Kubescape automatically suggest fixes for the pushes to your main branch by opening new PRs with the following workflow:
+
+```yaml
+name: Suggest autofixes with Kubescape for direct commits by PR
+on: 
+  push:
+    branches: [ main ]
+
+jobs:
+  kubescape-fix-commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v35
+    - uses: kubescape/github-action@main
+      with:
+        account: ${{secrets.KUBESCAPE_ACCOUNT}}
+        files: ${{ steps.changed-files.outputs.all_changed_files }}
+        fixFiles: true
+        format: "sarif"
     - uses: peter-evans/create-pull-request@v4
       # Remember to allow GitHub Actions to create and approve pull requests
       # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#preventing-github-actions-from-creating-or-approving-pull-requests
@@ -103,29 +124,13 @@ jobs:
         base: ${{ github.head_ref }}
         branch: kubescape-auto-fix-${{ github.head_ref || github.ref_name }}
         delete-branch: true
-    # # Alternatively, you can use googleapis/code-suggester to replace the reviewdog below
-    # - name: Clean up kubescape output
-    #   if: github.event_name == 'pull_request_target'
-    #   run: rm -f results.json results.sarif
-    # - name: PR Suggester
-    #   if: github.event_name == 'pull_request_target'
-    #   uses: googleapis/code-suggester@v2
-    #   env:
-    #     ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #   with:
-    #     command: review
-    #     pull_number: ${{ github.event.pull_request.number }}
-    #     git_dir: '.'
-    - name: PR Suggester
-      if: github.event_name == 'pull_request_target'
-      uses: reviewdog/action-suggester@v1
-      with:
-        tool_name: Kubescape
 ```
+
+The above workflow works by collecting the changes made directly to the original files. In the example above, a separate step that runs a different action opens the appropriate pull request. Due to how Github works, there are [limitations](https://github.com/peter-evans/create-pull-request/blob/main/docs/concepts-guidelines.md#triggering-further-workflow-runs) on running and opening pull requests to forks. The action running in this step is maintained by its respective maintainers, and not the Kubescape team, so you should review its documentation when troubleshooting the process of triggering the workflow run and opening pull requests.
 
 Please note that since Kubescape provides automatic fixes only to the rendered YAML manifests, the workflow above will not produce correct fixes for Helm charts.
 
-The next important thing to note is that Kubescape only fixes the files. It does not open pull requests on its own. In the example above, a separate step that runs a different action opens the appropriate pull request. Due to how Github works, there are [limitations](https://github.com/peter-evans/create-pull-request/blob/main/docs/concepts-guidelines.md#triggering-further-workflow-runs) on running and opening pull requests to forks. The action running in this step is maintained by its respective maintainers, and not the Kubescape team, so you should review its documentation when troubleshooting the process of triggering the workflow run and opening pull requests.
+The next important thing to note is that Kubescape only fixes the files. It does not open pull requests or generate code reviews on its own.
 
 ## Inputs
 
