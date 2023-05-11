@@ -1,29 +1,19 @@
-name: Suggest autofixes with Kubescape
+name: Suggest autofixes with Kubescape for direct commits by PR
 on: 
   push:
     branches: [ main ]
-  pull_request_target:
 
 jobs:
-  kubescape-fix:
+  kubescape-fix-commit:
     runs-on: ubuntu-latest
     permissions:
-      # Needed only for "push" events
       contents: write
-      # Needed for both "push" and "pull_request_target" events
       pull-requests: write
 
     steps:
     - uses: actions/checkout@v3
-      if: github.event_name != 'pull_request_target'
       with:
         fetch-depth: 0
-    - uses: actions/checkout@v3
-      if: github.event_name == 'pull_request_target'
-      with:
-        fetch-depth: 0
-        ref: ${{github.event.pull_request.head.ref}}
-        repository: ${{github.event.pull_request.head.repo.full_name}}
     - name: Get changed files
       id: changed-files
       uses: tj-actions/changed-files@v35
@@ -33,13 +23,6 @@ jobs:
         files: ${{ steps.changed-files.outputs.all_changed_files }}
         fixFiles: true
         format: "sarif"
-    # Use HollowMan6/sarif4reviewdog to support SARIF format for reviewdog
-    - name: PR Suggester by SARIF file
-      if: github.event_name == 'pull_request_target'
-      uses: HollowMan6/sarif4reviewdog@v1.0.0
-      with:
-        file: 'results.sarif'
-        level: warning
     - uses: peter-evans/create-pull-request@v4
       # Remember to allow GitHub Actions to create and approve pull requests
       # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#preventing-github-actions-from-creating-or-approving-pull-requests
@@ -58,21 +41,3 @@ jobs:
         base: ${{ github.head_ref }}
         branch: kubescape-auto-fix-${{ github.head_ref || github.ref_name }}
         delete-branch: true
-    # # Alternatively, you can use googleapis/code-suggester to replace the reviewdog below
-    # - name: Clean up kubescape output
-    #   if: github.event_name == 'pull_request_target'
-    #   run: rm -f results.json results.sarif
-    # - name: PR Suggester
-    #   if: github.event_name == 'pull_request_target'
-    #   uses: googleapis/code-suggester@v2
-    #   env:
-    #     ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #   with:
-    #     command: review
-    #     pull_number: ${{ github.event.pull_request.number }}
-    #     git_dir: '.'
-    - name: PR Suggester
-      if: github.event_name == 'pull_request_target'
-      uses: reviewdog/action-suggester@v1
-      with:
-        tool_name: Kubescape

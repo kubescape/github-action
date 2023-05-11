@@ -1,0 +1,31 @@
+name: Suggest autofixes with Kubescape for PR by reviews
+on:
+  pull_request_target:
+
+jobs:
+  kubescape-fix-pr-reviews:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        ref: ${{github.event.pull_request.head.ref}}
+        repository: ${{github.event.pull_request.head.repo.full_name}}
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v35
+    - uses: kubescape/github-action@main
+      with:
+        account: ${{secrets.KUBESCAPE_ACCOUNT}}
+        files: ${{ steps.changed-files.outputs.all_changed_files }}
+        fixFiles: true
+        format: "sarif"
+    - name: PR Suggester according to SARIF file
+      if: github.event_name == 'pull_request_target'
+      uses: HollowMan6/sarif4reviewdog@v1.0.0
+      with:
+        file: 'results.sarif'
+        level: warning
