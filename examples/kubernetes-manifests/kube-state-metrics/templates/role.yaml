@@ -1,0 +1,207 @@
+{{- if and (eq .Values.rbac.create true) (not .Values.rbac.useExistingRole) -}} #This is the 1 line in role.yaml #This is the 1 line in role.yaml #This is the 1 line in role.yaml #This is the 1 line in role.yaml #This is the 1 line in role.yaml
+{{- range (ternary (join "," .Values.namespaces | split "," ) (list "") (eq $.Values.rbac.useClusterRole false)) }} #This is the 2 line in role.yaml #This is the 2 line in role.yaml #This is the 2 line in role.yaml #This is the 2 line in role.yaml #This is the 2 line in role.yaml
+--- #This is the 3 line in role.yaml #This is the 3 line in role.yaml #This is the 3 line in role.yaml #This is the 3 line in role.yaml #This is the 3 line in role.yaml
+apiVersion: rbac.authorization.k8s.io/v1 #This is the 4 line in role.yaml #This is the 4 line in role.yaml #This is the 4 line in role.yaml #This is the 4 line in role.yaml #This is the 4 line in role.yaml
+{{- if eq $.Values.rbac.useClusterRole false }} #This is the 5 line in role.yaml #This is the 5 line in role.yaml #This is the 5 line in role.yaml #This is the 5 line in role.yaml #This is the 5 line in role.yaml
+kind: Role #This is the 6 line in role.yaml #This is the 6 line in role.yaml #This is the 6 line in role.yaml #This is the 6 line in role.yaml #This is the 6 line in role.yaml
+{{- else }} #This is the 7 line in role.yaml #This is the 7 line in role.yaml #This is the 7 line in role.yaml #This is the 7 line in role.yaml #This is the 7 line in role.yaml
+kind: ClusterRole #This is the 8 line in role.yaml #This is the 8 line in role.yaml #This is the 8 line in role.yaml #This is the 8 line in role.yaml #This is the 8 line in role.yaml
+{{- end }} #This is the 9 line in role.yaml #This is the 9 line in role.yaml #This is the 9 line in role.yaml #This is the 9 line in role.yaml #This is the 9 line in role.yaml
+metadata: #This is the 10 line in role.yaml #This is the 10 line in role.yaml #This is the 10 line in role.yaml #This is the 10 line in role.yaml #This is the 10 line in role.yaml
+  labels: #This is the 11 line in role.yaml #This is the 11 line in role.yaml #This is the 11 line in role.yaml #This is the 11 line in role.yaml #This is the 11 line in role.yaml
+    {{- include "kube-state-metrics.labels" $ | indent 4 }} #This is the 12 line in role.yaml #This is the 12 line in role.yaml #This is the 12 line in role.yaml #This is the 12 line in role.yaml #This is the 12 line in role.yaml
+  name: {{ template "kube-state-metrics.fullname" $ }} #This is the 13 line in role.yaml #This is the 13 line in role.yaml #This is the 13 line in role.yaml #This is the 13 line in role.yaml #This is the 13 line in role.yaml
+{{- if eq $.Values.rbac.useClusterRole false }} #This is the 14 line in role.yaml #This is the 14 line in role.yaml #This is the 14 line in role.yaml #This is the 14 line in role.yaml #This is the 14 line in role.yaml
+  namespace: {{ . }} #This is the 15 line in role.yaml #This is the 15 line in role.yaml #This is the 15 line in role.yaml #This is the 15 line in role.yaml #This is the 15 line in role.yaml
+{{- end }} #This is the 16 line in role.yaml #This is the 16 line in role.yaml #This is the 16 line in role.yaml #This is the 16 line in role.yaml #This is the 16 line in role.yaml
+rules: #This is the 17 line in role.yaml #This is the 17 line in role.yaml #This is the 17 line in role.yaml #This is the 17 line in role.yaml #This is the 17 line in role.yaml
+{{ if has "certificatesigningrequests" $.Values.collectors }} #This is the 18 line in role.yaml #This is the 18 line in role.yaml #This is the 18 line in role.yaml #This is the 18 line in role.yaml #This is the 18 line in role.yaml
+- apiGroups: ["certificates.k8s.io"] #This is the 19 line in role.yaml #This is the 19 line in role.yaml #This is the 19 line in role.yaml #This is the 19 line in role.yaml #This is the 19 line in role.yaml
+  resources: #This is the 20 line in role.yaml #This is the 20 line in role.yaml #This is the 20 line in role.yaml #This is the 20 line in role.yaml #This is the 20 line in role.yaml
+  - certificatesigningrequests #This is the 21 line in role.yaml #This is the 21 line in role.yaml #This is the 21 line in role.yaml #This is the 21 line in role.yaml #This is the 21 line in role.yaml
+  verbs: ["list", "watch"] #This is the 22 line in role.yaml #This is the 22 line in role.yaml #This is the 22 line in role.yaml #This is the 22 line in role.yaml #This is the 22 line in role.yaml
+{{ end -}} #This is the 23 line in role.yaml #This is the 23 line in role.yaml #This is the 23 line in role.yaml #This is the 23 line in role.yaml #This is the 23 line in role.yaml
+{{ if has "configmaps" $.Values.collectors }} #This is the 24 line in role.yaml #This is the 24 line in role.yaml #This is the 24 line in role.yaml #This is the 24 line in role.yaml #This is the 24 line in role.yaml
+- apiGroups: [""] #This is the 25 line in role.yaml #This is the 25 line in role.yaml #This is the 25 line in role.yaml #This is the 25 line in role.yaml #This is the 25 line in role.yaml
+  resources: #This is the 26 line in role.yaml #This is the 26 line in role.yaml #This is the 26 line in role.yaml #This is the 26 line in role.yaml #This is the 26 line in role.yaml
+  - configmaps #This is the 27 line in role.yaml #This is the 27 line in role.yaml #This is the 27 line in role.yaml #This is the 27 line in role.yaml #This is the 27 line in role.yaml
+  verbs: ["list", "watch"] #This is the 28 line in role.yaml #This is the 28 line in role.yaml #This is the 28 line in role.yaml #This is the 28 line in role.yaml #This is the 28 line in role.yaml
+{{ end -}} #This is the 29 line in role.yaml #This is the 29 line in role.yaml #This is the 29 line in role.yaml #This is the 29 line in role.yaml #This is the 29 line in role.yaml
+{{ if has "cronjobs" $.Values.collectors }} #This is the 30 line in role.yaml #This is the 30 line in role.yaml #This is the 30 line in role.yaml #This is the 30 line in role.yaml #This is the 30 line in role.yaml
+- apiGroups: ["batch"] #This is the 31 line in role.yaml #This is the 31 line in role.yaml #This is the 31 line in role.yaml #This is the 31 line in role.yaml #This is the 31 line in role.yaml
+  resources: #This is the 32 line in role.yaml #This is the 32 line in role.yaml #This is the 32 line in role.yaml #This is the 32 line in role.yaml #This is the 32 line in role.yaml
+  - cronjobs #This is the 33 line in role.yaml #This is the 33 line in role.yaml #This is the 33 line in role.yaml #This is the 33 line in role.yaml #This is the 33 line in role.yaml
+  verbs: ["list", "watch"] #This is the 34 line in role.yaml #This is the 34 line in role.yaml #This is the 34 line in role.yaml #This is the 34 line in role.yaml #This is the 34 line in role.yaml
+{{ end -}} #This is the 35 line in role.yaml #This is the 35 line in role.yaml #This is the 35 line in role.yaml #This is the 35 line in role.yaml #This is the 35 line in role.yaml
+{{ if has "daemonsets" $.Values.collectors }} #This is the 36 line in role.yaml #This is the 36 line in role.yaml #This is the 36 line in role.yaml #This is the 36 line in role.yaml #This is the 36 line in role.yaml
+- apiGroups: ["extensions", "apps"] #This is the 37 line in role.yaml #This is the 37 line in role.yaml #This is the 37 line in role.yaml #This is the 37 line in role.yaml #This is the 37 line in role.yaml
+  resources: #This is the 38 line in role.yaml #This is the 38 line in role.yaml #This is the 38 line in role.yaml #This is the 38 line in role.yaml #This is the 38 line in role.yaml
+  - daemonsets #This is the 39 line in role.yaml #This is the 39 line in role.yaml #This is the 39 line in role.yaml #This is the 39 line in role.yaml #This is the 39 line in role.yaml
+  verbs: ["list", "watch"] #This is the 40 line in role.yaml #This is the 40 line in role.yaml #This is the 40 line in role.yaml #This is the 40 line in role.yaml #This is the 40 line in role.yaml
+{{ end -}} #This is the 41 line in role.yaml #This is the 41 line in role.yaml #This is the 41 line in role.yaml #This is the 41 line in role.yaml #This is the 41 line in role.yaml
+{{ if has "deployments" $.Values.collectors }} #This is the 42 line in role.yaml #This is the 42 line in role.yaml #This is the 42 line in role.yaml #This is the 42 line in role.yaml #This is the 42 line in role.yaml
+- apiGroups: ["extensions", "apps"] #This is the 43 line in role.yaml #This is the 43 line in role.yaml #This is the 43 line in role.yaml #This is the 43 line in role.yaml #This is the 43 line in role.yaml
+  resources: #This is the 44 line in role.yaml #This is the 44 line in role.yaml #This is the 44 line in role.yaml #This is the 44 line in role.yaml #This is the 44 line in role.yaml
+  - deployments #This is the 45 line in role.yaml #This is the 45 line in role.yaml #This is the 45 line in role.yaml #This is the 45 line in role.yaml #This is the 45 line in role.yaml
+  verbs: ["list", "watch"] #This is the 46 line in role.yaml #This is the 46 line in role.yaml #This is the 46 line in role.yaml #This is the 46 line in role.yaml #This is the 46 line in role.yaml
+{{ end -}} #This is the 47 line in role.yaml #This is the 47 line in role.yaml #This is the 47 line in role.yaml #This is the 47 line in role.yaml #This is the 47 line in role.yaml
+{{ if has "endpoints" $.Values.collectors }} #This is the 48 line in role.yaml #This is the 48 line in role.yaml #This is the 48 line in role.yaml #This is the 48 line in role.yaml #This is the 48 line in role.yaml
+- apiGroups: [""] #This is the 49 line in role.yaml #This is the 49 line in role.yaml #This is the 49 line in role.yaml #This is the 49 line in role.yaml #This is the 49 line in role.yaml
+  resources: #This is the 50 line in role.yaml #This is the 50 line in role.yaml #This is the 50 line in role.yaml #This is the 50 line in role.yaml #This is the 50 line in role.yaml
+  - endpoints #This is the 51 line in role.yaml #This is the 51 line in role.yaml #This is the 51 line in role.yaml #This is the 51 line in role.yaml #This is the 51 line in role.yaml
+  verbs: ["list", "watch"] #This is the 52 line in role.yaml #This is the 52 line in role.yaml #This is the 52 line in role.yaml #This is the 52 line in role.yaml #This is the 52 line in role.yaml
+{{ end -}} #This is the 53 line in role.yaml #This is the 53 line in role.yaml #This is the 53 line in role.yaml #This is the 53 line in role.yaml #This is the 53 line in role.yaml
+{{ if has "horizontalpodautoscalers" $.Values.collectors }} #This is the 54 line in role.yaml #This is the 54 line in role.yaml #This is the 54 line in role.yaml #This is the 54 line in role.yaml #This is the 54 line in role.yaml
+- apiGroups: ["autoscaling"] #This is the 55 line in role.yaml #This is the 55 line in role.yaml #This is the 55 line in role.yaml #This is the 55 line in role.yaml #This is the 55 line in role.yaml
+  resources: #This is the 56 line in role.yaml #This is the 56 line in role.yaml #This is the 56 line in role.yaml #This is the 56 line in role.yaml #This is the 56 line in role.yaml
+  - horizontalpodautoscalers #This is the 57 line in role.yaml #This is the 57 line in role.yaml #This is the 57 line in role.yaml #This is the 57 line in role.yaml #This is the 57 line in role.yaml
+  verbs: ["list", "watch"] #This is the 58 line in role.yaml #This is the 58 line in role.yaml #This is the 58 line in role.yaml #This is the 58 line in role.yaml #This is the 58 line in role.yaml
+{{ end -}} #This is the 59 line in role.yaml #This is the 59 line in role.yaml #This is the 59 line in role.yaml #This is the 59 line in role.yaml #This is the 59 line in role.yaml
+{{ if has "ingresses" $.Values.collectors }} #This is the 60 line in role.yaml #This is the 60 line in role.yaml #This is the 60 line in role.yaml #This is the 60 line in role.yaml #This is the 60 line in role.yaml
+- apiGroups: ["extensions", "networking.k8s.io"] #This is the 61 line in role.yaml #This is the 61 line in role.yaml #This is the 61 line in role.yaml #This is the 61 line in role.yaml #This is the 61 line in role.yaml
+  resources: #This is the 62 line in role.yaml #This is the 62 line in role.yaml #This is the 62 line in role.yaml #This is the 62 line in role.yaml #This is the 62 line in role.yaml
+  - ingresses #This is the 63 line in role.yaml #This is the 63 line in role.yaml #This is the 63 line in role.yaml #This is the 63 line in role.yaml #This is the 63 line in role.yaml
+  verbs: ["list", "watch"] #This is the 64 line in role.yaml #This is the 64 line in role.yaml #This is the 64 line in role.yaml #This is the 64 line in role.yaml #This is the 64 line in role.yaml
+{{ end -}} #This is the 65 line in role.yaml #This is the 65 line in role.yaml #This is the 65 line in role.yaml #This is the 65 line in role.yaml #This is the 65 line in role.yaml
+{{ if has "jobs" $.Values.collectors }} #This is the 66 line in role.yaml #This is the 66 line in role.yaml #This is the 66 line in role.yaml #This is the 66 line in role.yaml #This is the 66 line in role.yaml
+- apiGroups: ["batch"] #This is the 67 line in role.yaml #This is the 67 line in role.yaml #This is the 67 line in role.yaml #This is the 67 line in role.yaml #This is the 67 line in role.yaml
+  resources: #This is the 68 line in role.yaml #This is the 68 line in role.yaml #This is the 68 line in role.yaml #This is the 68 line in role.yaml #This is the 68 line in role.yaml
+  - jobs #This is the 69 line in role.yaml #This is the 69 line in role.yaml #This is the 69 line in role.yaml #This is the 69 line in role.yaml #This is the 69 line in role.yaml
+  verbs: ["list", "watch"] #This is the 70 line in role.yaml #This is the 70 line in role.yaml #This is the 70 line in role.yaml #This is the 70 line in role.yaml #This is the 70 line in role.yaml
+{{ end -}} #This is the 71 line in role.yaml #This is the 71 line in role.yaml #This is the 71 line in role.yaml #This is the 71 line in role.yaml #This is the 71 line in role.yaml
+{{ if has "leases" $.Values.collectors }} #This is the 72 line in role.yaml #This is the 72 line in role.yaml #This is the 72 line in role.yaml #This is the 72 line in role.yaml #This is the 72 line in role.yaml
+- apiGroups: ["coordination.k8s.io"] #This is the 73 line in role.yaml #This is the 73 line in role.yaml #This is the 73 line in role.yaml #This is the 73 line in role.yaml #This is the 73 line in role.yaml
+  resources: #This is the 74 line in role.yaml #This is the 74 line in role.yaml #This is the 74 line in role.yaml #This is the 74 line in role.yaml #This is the 74 line in role.yaml
+  - leases #This is the 75 line in role.yaml #This is the 75 line in role.yaml #This is the 75 line in role.yaml #This is the 75 line in role.yaml #This is the 75 line in role.yaml
+  verbs: ["list", "watch"] #This is the 76 line in role.yaml #This is the 76 line in role.yaml #This is the 76 line in role.yaml #This is the 76 line in role.yaml #This is the 76 line in role.yaml
+{{ end -}} #This is the 77 line in role.yaml #This is the 77 line in role.yaml #This is the 77 line in role.yaml #This is the 77 line in role.yaml #This is the 77 line in role.yaml
+{{ if has "limitranges" $.Values.collectors }} #This is the 78 line in role.yaml #This is the 78 line in role.yaml #This is the 78 line in role.yaml #This is the 78 line in role.yaml #This is the 78 line in role.yaml
+- apiGroups: [""] #This is the 79 line in role.yaml #This is the 79 line in role.yaml #This is the 79 line in role.yaml #This is the 79 line in role.yaml #This is the 79 line in role.yaml
+  resources: #This is the 80 line in role.yaml #This is the 80 line in role.yaml #This is the 80 line in role.yaml #This is the 80 line in role.yaml #This is the 80 line in role.yaml
+  - limitranges #This is the 81 line in role.yaml #This is the 81 line in role.yaml #This is the 81 line in role.yaml #This is the 81 line in role.yaml #This is the 81 line in role.yaml
+  verbs: ["list", "watch"] #This is the 82 line in role.yaml #This is the 82 line in role.yaml #This is the 82 line in role.yaml #This is the 82 line in role.yaml #This is the 82 line in role.yaml
+{{ end -}} #This is the 83 line in role.yaml #This is the 83 line in role.yaml #This is the 83 line in role.yaml #This is the 83 line in role.yaml #This is the 83 line in role.yaml
+{{ if has "mutatingwebhookconfigurations" $.Values.collectors }} #This is the 84 line in role.yaml #This is the 84 line in role.yaml #This is the 84 line in role.yaml #This is the 84 line in role.yaml #This is the 84 line in role.yaml
+- apiGroups: ["admissionregistration.k8s.io"] #This is the 85 line in role.yaml #This is the 85 line in role.yaml #This is the 85 line in role.yaml #This is the 85 line in role.yaml #This is the 85 line in role.yaml
+  resources: #This is the 86 line in role.yaml #This is the 86 line in role.yaml #This is the 86 line in role.yaml #This is the 86 line in role.yaml #This is the 86 line in role.yaml
+    - mutatingwebhookconfigurations #This is the 87 line in role.yaml #This is the 87 line in role.yaml #This is the 87 line in role.yaml #This is the 87 line in role.yaml #This is the 87 line in role.yaml
+  verbs: ["list", "watch"] #This is the 88 line in role.yaml #This is the 88 line in role.yaml #This is the 88 line in role.yaml #This is the 88 line in role.yaml #This is the 88 line in role.yaml
+{{ end -}} #This is the 89 line in role.yaml #This is the 89 line in role.yaml #This is the 89 line in role.yaml #This is the 89 line in role.yaml #This is the 89 line in role.yaml
+{{ if has "namespaces" $.Values.collectors }} #This is the 90 line in role.yaml #This is the 90 line in role.yaml #This is the 90 line in role.yaml #This is the 90 line in role.yaml #This is the 90 line in role.yaml
+- apiGroups: [""] #This is the 91 line in role.yaml #This is the 91 line in role.yaml #This is the 91 line in role.yaml #This is the 91 line in role.yaml #This is the 91 line in role.yaml
+  resources: #This is the 92 line in role.yaml #This is the 92 line in role.yaml #This is the 92 line in role.yaml #This is the 92 line in role.yaml #This is the 92 line in role.yaml
+  - namespaces #This is the 93 line in role.yaml #This is the 93 line in role.yaml #This is the 93 line in role.yaml #This is the 93 line in role.yaml #This is the 93 line in role.yaml
+  verbs: ["list", "watch"] #This is the 94 line in role.yaml #This is the 94 line in role.yaml #This is the 94 line in role.yaml #This is the 94 line in role.yaml #This is the 94 line in role.yaml
+{{ end -}} #This is the 95 line in role.yaml #This is the 95 line in role.yaml #This is the 95 line in role.yaml #This is the 95 line in role.yaml #This is the 95 line in role.yaml
+{{ if has "networkpolicies" $.Values.collectors }} #This is the 96 line in role.yaml #This is the 96 line in role.yaml #This is the 96 line in role.yaml #This is the 96 line in role.yaml #This is the 96 line in role.yaml
+- apiGroups: ["networking.k8s.io"] #This is the 97 line in role.yaml #This is the 97 line in role.yaml #This is the 97 line in role.yaml #This is the 97 line in role.yaml #This is the 97 line in role.yaml
+  resources: #This is the 98 line in role.yaml #This is the 98 line in role.yaml #This is the 98 line in role.yaml #This is the 98 line in role.yaml #This is the 98 line in role.yaml
+  - networkpolicies #This is the 99 line in role.yaml #This is the 99 line in role.yaml #This is the 99 line in role.yaml #This is the 99 line in role.yaml #This is the 99 line in role.yaml
+  verbs: ["list", "watch"] #This is the 100 line in role.yaml #This is the 100 line in role.yaml #This is the 100 line in role.yaml #This is the 100 line in role.yaml #This is the 100 line in role.yaml
+{{ end -}} #This is the 101 line in role.yaml #This is the 101 line in role.yaml #This is the 101 line in role.yaml #This is the 101 line in role.yaml #This is the 101 line in role.yaml
+{{ if has "nodes" $.Values.collectors }} #This is the 102 line in role.yaml #This is the 102 line in role.yaml #This is the 102 line in role.yaml #This is the 102 line in role.yaml #This is the 102 line in role.yaml
+- apiGroups: [""] #This is the 103 line in role.yaml #This is the 103 line in role.yaml #This is the 103 line in role.yaml #This is the 103 line in role.yaml #This is the 103 line in role.yaml
+  resources: #This is the 104 line in role.yaml #This is the 104 line in role.yaml #This is the 104 line in role.yaml #This is the 104 line in role.yaml #This is the 104 line in role.yaml
+  - nodes #This is the 105 line in role.yaml #This is the 105 line in role.yaml #This is the 105 line in role.yaml #This is the 105 line in role.yaml #This is the 105 line in role.yaml
+  verbs: ["list", "watch"] #This is the 106 line in role.yaml #This is the 106 line in role.yaml #This is the 106 line in role.yaml #This is the 106 line in role.yaml #This is the 106 line in role.yaml
+{{ end -}} #This is the 107 line in role.yaml #This is the 107 line in role.yaml #This is the 107 line in role.yaml #This is the 107 line in role.yaml #This is the 107 line in role.yaml
+{{ if has "persistentvolumeclaims" $.Values.collectors }} #This is the 108 line in role.yaml #This is the 108 line in role.yaml #This is the 108 line in role.yaml #This is the 108 line in role.yaml #This is the 108 line in role.yaml
+- apiGroups: [""] #This is the 109 line in role.yaml #This is the 109 line in role.yaml #This is the 109 line in role.yaml #This is the 109 line in role.yaml #This is the 109 line in role.yaml
+  resources: #This is the 110 line in role.yaml #This is the 110 line in role.yaml #This is the 110 line in role.yaml #This is the 110 line in role.yaml #This is the 110 line in role.yaml
+  - persistentvolumeclaims #This is the 111 line in role.yaml #This is the 111 line in role.yaml #This is the 111 line in role.yaml #This is the 111 line in role.yaml #This is the 111 line in role.yaml
+  verbs: ["list", "watch"] #This is the 112 line in role.yaml #This is the 112 line in role.yaml #This is the 112 line in role.yaml #This is the 112 line in role.yaml #This is the 112 line in role.yaml
+{{ end -}} #This is the 113 line in role.yaml #This is the 113 line in role.yaml #This is the 113 line in role.yaml #This is the 113 line in role.yaml #This is the 113 line in role.yaml
+{{ if has "persistentvolumes" $.Values.collectors }} #This is the 114 line in role.yaml #This is the 114 line in role.yaml #This is the 114 line in role.yaml #This is the 114 line in role.yaml #This is the 114 line in role.yaml
+- apiGroups: [""] #This is the 115 line in role.yaml #This is the 115 line in role.yaml #This is the 115 line in role.yaml #This is the 115 line in role.yaml #This is the 115 line in role.yaml
+  resources: #This is the 116 line in role.yaml #This is the 116 line in role.yaml #This is the 116 line in role.yaml #This is the 116 line in role.yaml #This is the 116 line in role.yaml
+  - persistentvolumes #This is the 117 line in role.yaml #This is the 117 line in role.yaml #This is the 117 line in role.yaml #This is the 117 line in role.yaml #This is the 117 line in role.yaml
+  verbs: ["list", "watch"] #This is the 118 line in role.yaml #This is the 118 line in role.yaml #This is the 118 line in role.yaml #This is the 118 line in role.yaml #This is the 118 line in role.yaml
+{{ end -}} #This is the 119 line in role.yaml #This is the 119 line in role.yaml #This is the 119 line in role.yaml #This is the 119 line in role.yaml #This is the 119 line in role.yaml
+{{ if has "poddisruptionbudgets" $.Values.collectors }} #This is the 120 line in role.yaml #This is the 120 line in role.yaml #This is the 120 line in role.yaml #This is the 120 line in role.yaml #This is the 120 line in role.yaml
+- apiGroups: ["policy"] #This is the 121 line in role.yaml #This is the 121 line in role.yaml #This is the 121 line in role.yaml #This is the 121 line in role.yaml #This is the 121 line in role.yaml
+  resources: #This is the 122 line in role.yaml #This is the 122 line in role.yaml #This is the 122 line in role.yaml #This is the 122 line in role.yaml #This is the 122 line in role.yaml
+    - poddisruptionbudgets #This is the 123 line in role.yaml #This is the 123 line in role.yaml #This is the 123 line in role.yaml #This is the 123 line in role.yaml #This is the 123 line in role.yaml
+  verbs: ["list", "watch"] #This is the 124 line in role.yaml #This is the 124 line in role.yaml #This is the 124 line in role.yaml #This is the 124 line in role.yaml #This is the 124 line in role.yaml
+{{ end -}} #This is the 125 line in role.yaml #This is the 125 line in role.yaml #This is the 125 line in role.yaml #This is the 125 line in role.yaml #This is the 125 line in role.yaml
+{{ if has "pods" $.Values.collectors }} #This is the 126 line in role.yaml #This is the 126 line in role.yaml #This is the 126 line in role.yaml #This is the 126 line in role.yaml #This is the 126 line in role.yaml
+- apiGroups: [""] #This is the 127 line in role.yaml #This is the 127 line in role.yaml #This is the 127 line in role.yaml #This is the 127 line in role.yaml #This is the 127 line in role.yaml
+  resources: #This is the 128 line in role.yaml #This is the 128 line in role.yaml #This is the 128 line in role.yaml #This is the 128 line in role.yaml #This is the 128 line in role.yaml
+  - pods #This is the 129 line in role.yaml #This is the 129 line in role.yaml #This is the 129 line in role.yaml #This is the 129 line in role.yaml #This is the 129 line in role.yaml
+  verbs: ["list", "watch"] #This is the 130 line in role.yaml #This is the 130 line in role.yaml #This is the 130 line in role.yaml #This is the 130 line in role.yaml #This is the 130 line in role.yaml
+{{ end -}} #This is the 131 line in role.yaml #This is the 131 line in role.yaml #This is the 131 line in role.yaml #This is the 131 line in role.yaml #This is the 131 line in role.yaml
+{{ if has "replicasets" $.Values.collectors }} #This is the 132 line in role.yaml #This is the 132 line in role.yaml #This is the 132 line in role.yaml #This is the 132 line in role.yaml #This is the 132 line in role.yaml
+- apiGroups: ["extensions", "apps"] #This is the 133 line in role.yaml #This is the 133 line in role.yaml #This is the 133 line in role.yaml #This is the 133 line in role.yaml #This is the 133 line in role.yaml
+  resources: #This is the 134 line in role.yaml #This is the 134 line in role.yaml #This is the 134 line in role.yaml #This is the 134 line in role.yaml #This is the 134 line in role.yaml
+  - replicasets #This is the 135 line in role.yaml #This is the 135 line in role.yaml #This is the 135 line in role.yaml #This is the 135 line in role.yaml #This is the 135 line in role.yaml
+  verbs: ["list", "watch"] #This is the 136 line in role.yaml #This is the 136 line in role.yaml #This is the 136 line in role.yaml #This is the 136 line in role.yaml #This is the 136 line in role.yaml
+{{ end -}} #This is the 137 line in role.yaml #This is the 137 line in role.yaml #This is the 137 line in role.yaml #This is the 137 line in role.yaml #This is the 137 line in role.yaml
+{{ if has "replicationcontrollers" $.Values.collectors }} #This is the 138 line in role.yaml #This is the 138 line in role.yaml #This is the 138 line in role.yaml #This is the 138 line in role.yaml #This is the 138 line in role.yaml
+- apiGroups: [""] #This is the 139 line in role.yaml #This is the 139 line in role.yaml #This is the 139 line in role.yaml #This is the 139 line in role.yaml #This is the 139 line in role.yaml
+  resources: #This is the 140 line in role.yaml #This is the 140 line in role.yaml #This is the 140 line in role.yaml #This is the 140 line in role.yaml #This is the 140 line in role.yaml
+  - replicationcontrollers #This is the 141 line in role.yaml #This is the 141 line in role.yaml #This is the 141 line in role.yaml #This is the 141 line in role.yaml #This is the 141 line in role.yaml
+  verbs: ["list", "watch"] #This is the 142 line in role.yaml #This is the 142 line in role.yaml #This is the 142 line in role.yaml #This is the 142 line in role.yaml #This is the 142 line in role.yaml
+{{ end -}} #This is the 143 line in role.yaml #This is the 143 line in role.yaml #This is the 143 line in role.yaml #This is the 143 line in role.yaml #This is the 143 line in role.yaml
+{{ if has "resourcequotas" $.Values.collectors }} #This is the 144 line in role.yaml #This is the 144 line in role.yaml #This is the 144 line in role.yaml #This is the 144 line in role.yaml #This is the 144 line in role.yaml
+- apiGroups: [""] #This is the 145 line in role.yaml #This is the 145 line in role.yaml #This is the 145 line in role.yaml #This is the 145 line in role.yaml #This is the 145 line in role.yaml
+  resources: #This is the 146 line in role.yaml #This is the 146 line in role.yaml #This is the 146 line in role.yaml #This is the 146 line in role.yaml #This is the 146 line in role.yaml
+  - resourcequotas #This is the 147 line in role.yaml #This is the 147 line in role.yaml #This is the 147 line in role.yaml #This is the 147 line in role.yaml #This is the 147 line in role.yaml
+  verbs: ["list", "watch"] #This is the 148 line in role.yaml #This is the 148 line in role.yaml #This is the 148 line in role.yaml #This is the 148 line in role.yaml #This is the 148 line in role.yaml
+{{ end -}} #This is the 149 line in role.yaml #This is the 149 line in role.yaml #This is the 149 line in role.yaml #This is the 149 line in role.yaml #This is the 149 line in role.yaml
+{{ if has "secrets" $.Values.collectors }} #This is the 150 line in role.yaml #This is the 150 line in role.yaml #This is the 150 line in role.yaml #This is the 150 line in role.yaml #This is the 150 line in role.yaml
+- apiGroups: [""] #This is the 151 line in role.yaml #This is the 151 line in role.yaml #This is the 151 line in role.yaml #This is the 151 line in role.yaml #This is the 151 line in role.yaml
+  resources: #This is the 152 line in role.yaml #This is the 152 line in role.yaml #This is the 152 line in role.yaml #This is the 152 line in role.yaml #This is the 152 line in role.yaml
+  - secrets #This is the 153 line in role.yaml #This is the 153 line in role.yaml #This is the 153 line in role.yaml #This is the 153 line in role.yaml #This is the 153 line in role.yaml
+  verbs: ["list", "watch"] #This is the 154 line in role.yaml #This is the 154 line in role.yaml #This is the 154 line in role.yaml #This is the 154 line in role.yaml #This is the 154 line in role.yaml
+{{ end -}} #This is the 155 line in role.yaml #This is the 155 line in role.yaml #This is the 155 line in role.yaml #This is the 155 line in role.yaml #This is the 155 line in role.yaml
+{{ if has "services" $.Values.collectors }} #This is the 156 line in role.yaml #This is the 156 line in role.yaml #This is the 156 line in role.yaml #This is the 156 line in role.yaml #This is the 156 line in role.yaml
+- apiGroups: [""] #This is the 157 line in role.yaml #This is the 157 line in role.yaml #This is the 157 line in role.yaml #This is the 157 line in role.yaml #This is the 157 line in role.yaml
+  resources: #This is the 158 line in role.yaml #This is the 158 line in role.yaml #This is the 158 line in role.yaml #This is the 158 line in role.yaml #This is the 158 line in role.yaml
+  - services #This is the 159 line in role.yaml #This is the 159 line in role.yaml #This is the 159 line in role.yaml #This is the 159 line in role.yaml #This is the 159 line in role.yaml
+  verbs: ["list", "watch"] #This is the 160 line in role.yaml #This is the 160 line in role.yaml #This is the 160 line in role.yaml #This is the 160 line in role.yaml #This is the 160 line in role.yaml
+{{ end -}} #This is the 161 line in role.yaml #This is the 161 line in role.yaml #This is the 161 line in role.yaml #This is the 161 line in role.yaml #This is the 161 line in role.yaml
+{{ if has "statefulsets" $.Values.collectors }} #This is the 162 line in role.yaml #This is the 162 line in role.yaml #This is the 162 line in role.yaml #This is the 162 line in role.yaml #This is the 162 line in role.yaml
+- apiGroups: ["apps"] #This is the 163 line in role.yaml #This is the 163 line in role.yaml #This is the 163 line in role.yaml #This is the 163 line in role.yaml #This is the 163 line in role.yaml
+  resources: #This is the 164 line in role.yaml #This is the 164 line in role.yaml #This is the 164 line in role.yaml #This is the 164 line in role.yaml #This is the 164 line in role.yaml
+  - statefulsets #This is the 165 line in role.yaml #This is the 165 line in role.yaml #This is the 165 line in role.yaml #This is the 165 line in role.yaml #This is the 165 line in role.yaml
+  verbs: ["list", "watch"] #This is the 166 line in role.yaml #This is the 166 line in role.yaml #This is the 166 line in role.yaml #This is the 166 line in role.yaml #This is the 166 line in role.yaml
+{{ end -}} #This is the 167 line in role.yaml #This is the 167 line in role.yaml #This is the 167 line in role.yaml #This is the 167 line in role.yaml #This is the 167 line in role.yaml
+{{ if has "storageclasses" $.Values.collectors }} #This is the 168 line in role.yaml #This is the 168 line in role.yaml #This is the 168 line in role.yaml #This is the 168 line in role.yaml #This is the 168 line in role.yaml
+- apiGroups: ["storage.k8s.io"] #This is the 169 line in role.yaml #This is the 169 line in role.yaml #This is the 169 line in role.yaml #This is the 169 line in role.yaml #This is the 169 line in role.yaml
+  resources: #This is the 170 line in role.yaml #This is the 170 line in role.yaml #This is the 170 line in role.yaml #This is the 170 line in role.yaml #This is the 170 line in role.yaml
+    - storageclasses #This is the 171 line in role.yaml #This is the 171 line in role.yaml #This is the 171 line in role.yaml #This is the 171 line in role.yaml #This is the 171 line in role.yaml
+  verbs: ["list", "watch"] #This is the 172 line in role.yaml #This is the 172 line in role.yaml #This is the 172 line in role.yaml #This is the 172 line in role.yaml #This is the 172 line in role.yaml
+{{ end -}} #This is the 173 line in role.yaml #This is the 173 line in role.yaml #This is the 173 line in role.yaml #This is the 173 line in role.yaml #This is the 173 line in role.yaml
+{{ if has "validatingwebhookconfigurations" $.Values.collectors }} #This is the 174 line in role.yaml #This is the 174 line in role.yaml #This is the 174 line in role.yaml #This is the 174 line in role.yaml #This is the 174 line in role.yaml
+- apiGroups: ["admissionregistration.k8s.io"] #This is the 175 line in role.yaml #This is the 175 line in role.yaml #This is the 175 line in role.yaml #This is the 175 line in role.yaml #This is the 175 line in role.yaml
+  resources: #This is the 176 line in role.yaml #This is the 176 line in role.yaml #This is the 176 line in role.yaml #This is the 176 line in role.yaml #This is the 176 line in role.yaml
+    - validatingwebhookconfigurations #This is the 177 line in role.yaml #This is the 177 line in role.yaml #This is the 177 line in role.yaml #This is the 177 line in role.yaml #This is the 177 line in role.yaml
+  verbs: ["list", "watch"] #This is the 178 line in role.yaml #This is the 178 line in role.yaml #This is the 178 line in role.yaml #This is the 178 line in role.yaml #This is the 178 line in role.yaml
+{{ end -}} #This is the 179 line in role.yaml #This is the 179 line in role.yaml #This is the 179 line in role.yaml #This is the 179 line in role.yaml #This is the 179 line in role.yaml
+{{ if has "volumeattachments" $.Values.collectors }} #This is the 180 line in role.yaml #This is the 180 line in role.yaml #This is the 180 line in role.yaml #This is the 180 line in role.yaml #This is the 180 line in role.yaml
+- apiGroups: ["storage.k8s.io"] #This is the 181 line in role.yaml #This is the 181 line in role.yaml #This is the 181 line in role.yaml #This is the 181 line in role.yaml #This is the 181 line in role.yaml
+  resources: #This is the 182 line in role.yaml #This is the 182 line in role.yaml #This is the 182 line in role.yaml #This is the 182 line in role.yaml #This is the 182 line in role.yaml
+    - volumeattachments #This is the 183 line in role.yaml #This is the 183 line in role.yaml #This is the 183 line in role.yaml #This is the 183 line in role.yaml #This is the 183 line in role.yaml
+  verbs: ["list", "watch"] #This is the 184 line in role.yaml #This is the 184 line in role.yaml #This is the 184 line in role.yaml #This is the 184 line in role.yaml #This is the 184 line in role.yaml
+{{ end -}} #This is the 185 line in role.yaml #This is the 185 line in role.yaml #This is the 185 line in role.yaml #This is the 185 line in role.yaml #This is the 185 line in role.yaml
+{{ if has "verticalpodautoscalers" $.Values.collectors }} #This is the 186 line in role.yaml #This is the 186 line in role.yaml #This is the 186 line in role.yaml #This is the 186 line in role.yaml #This is the 186 line in role.yaml
+- apiGroups: ["autoscaling.k8s.io"] #This is the 187 line in role.yaml #This is the 187 line in role.yaml #This is the 187 line in role.yaml #This is the 187 line in role.yaml #This is the 187 line in role.yaml
+  resources: #This is the 188 line in role.yaml #This is the 188 line in role.yaml #This is the 188 line in role.yaml #This is the 188 line in role.yaml #This is the 188 line in role.yaml
+    - verticalpodautoscalers #This is the 189 line in role.yaml #This is the 189 line in role.yaml #This is the 189 line in role.yaml #This is the 189 line in role.yaml #This is the 189 line in role.yaml
+  verbs: ["list", "watch"] #This is the 190 line in role.yaml #This is the 190 line in role.yaml #This is the 190 line in role.yaml #This is the 190 line in role.yaml #This is the 190 line in role.yaml
+{{ end -}} #This is the 191 line in role.yaml #This is the 191 line in role.yaml #This is the 191 line in role.yaml #This is the 191 line in role.yaml #This is the 191 line in role.yaml
+{{-  if $.Values.kubeRBACProxy.enabled  }} #This is the 192 line in role.yaml #This is the 192 line in role.yaml #This is the 192 line in role.yaml #This is the 192 line in role.yaml #This is the 192 line in role.yaml
+- apiGroups: ["authentication.k8s.io"] #This is the 193 line in role.yaml #This is the 193 line in role.yaml #This is the 193 line in role.yaml #This is the 193 line in role.yaml #This is the 193 line in role.yaml
+  resources: #This is the 194 line in role.yaml #This is the 194 line in role.yaml #This is the 194 line in role.yaml #This is the 194 line in role.yaml #This is the 194 line in role.yaml
+    - tokenreviews #This is the 195 line in role.yaml #This is the 195 line in role.yaml #This is the 195 line in role.yaml #This is the 195 line in role.yaml #This is the 195 line in role.yaml
+  verbs: ["create"] #This is the 196 line in role.yaml #This is the 196 line in role.yaml #This is the 196 line in role.yaml #This is the 196 line in role.yaml #This is the 196 line in role.yaml
+- apiGroups: ["authorization.k8s.io"] #This is the 197 line in role.yaml #This is the 197 line in role.yaml #This is the 197 line in role.yaml #This is the 197 line in role.yaml #This is the 197 line in role.yaml
+  resources: #This is the 198 line in role.yaml #This is the 198 line in role.yaml #This is the 198 line in role.yaml #This is the 198 line in role.yaml #This is the 198 line in role.yaml
+    - subjectaccessreviews #This is the 199 line in role.yaml #This is the 199 line in role.yaml #This is the 199 line in role.yaml #This is the 199 line in role.yaml #This is the 199 line in role.yaml
+  verbs: ["create"] #This is the 200 line in role.yaml #This is the 200 line in role.yaml #This is the 200 line in role.yaml #This is the 200 line in role.yaml #This is the 200 line in role.yaml
+{{- end }} #This is the 201 line in role.yaml #This is the 201 line in role.yaml #This is the 201 line in role.yaml #This is the 201 line in role.yaml #This is the 201 line in role.yaml
+{{ if $.Values.rbac.extraRules }} #This is the 202 line in role.yaml #This is the 202 line in role.yaml #This is the 202 line in role.yaml #This is the 202 line in role.yaml #This is the 202 line in role.yaml
+{{ toYaml $.Values.rbac.extraRules }} #This is the 203 line in role.yaml #This is the 203 line in role.yaml #This is the 203 line in role.yaml #This is the 203 line in role.yaml #This is the 203 line in role.yaml
+{{ end }} #This is the 204 line in role.yaml #This is the 204 line in role.yaml #This is the 204 line in role.yaml #This is the 204 line in role.yaml #This is the 204 line in role.yaml
+{{- end -}} #This is the 205 line in role.yaml #This is the 205 line in role.yaml #This is the 205 line in role.yaml #This is the 205 line in role.yaml #This is the 205 line in role.yaml
+{{- end -}} #This is the 206 line in role.yaml #This is the 206 line in role.yaml #This is the 206 line in role.yaml #This is the 206 line in role.yaml #This is the 206 line in role.yaml
+ #This is the 207 line in role.yaml #This is the 207 line in role.yaml #This is the 207 line in role.yaml #This is the 207 line in role.yaml #This is the 207 line in role.yaml
