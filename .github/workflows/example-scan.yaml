@@ -9,7 +9,7 @@ jobs:
       security-events: write
     steps:
     - uses: actions/checkout@v3
-    - uses: kubescape/github-action@main
+    - uses: MMMMMMorty/github-action@main
       continue-on-error: true
       with:
         format: sarif
