@@ -19,7 +19,13 @@ jobs:
         # # Optional - Scan a specific path. Default will scan all
         # files: "examples/*.yaml"
     - name: Print Kubescape scan results
-      run: cat report.sarif
+      run: |
+        const fs = require('fs');
+        const path = require('path');
+        const reportPath = path.join(process.env.GITHUB_WORKSPACE, 'report.sarif');
+        const reportContents = fs.readFileSync(reportPath, 'utf8');
+        console.log(reportContents);
+
     - name: Upload Kubescape scan results to Github Code Scanning
       uses: github/codeql-action/upload-sarif@v2
       with:
