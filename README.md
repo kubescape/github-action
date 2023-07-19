@@ -132,6 +132,37 @@ Please note that since Kubescape provides automatic fixes only to the rendered Y
 
 The next important thing to note is that Kubescape only fixes the files. It does not open pull requests or generate code reviews on its own.
 
+### Scanning images
+
+The Kubescape Github Action is also able to scan images. But you should be aware that image scanning cannot run in parallel with configuration scanning and file fixing at the moment. If you would like to run both image and configuration scanning, you should define at least two separate steps with the same action but different arguments: one for image scanning and the other for configuration scanning.
+
+To scan a container image with a Kubescape Github Action, use the following workflow definition, keeping in mind that you need to replace `image: "nginx"` with the appropriate image name:
+
+```yaml
+name: Kubescape scanning for image vulnerabilities
+on: [push, pull_request]
+jobs:
+  kubescape-scan-image:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+    - uses: actions/checkout@v3
+    - uses: kubescape/github-action@main
+      with:
+        image: "nginx"
+        # # Username for a private registry with the image
+        # registryUsername: ${{secrets.KUBESCAPE_REGISTRY_USERNAME}}
+        # # Password for a private registry with the image
+        # registryPassword: ${{secrets.KUBESCAPE_REGISTRY_PASSWORD}}
+        # # Fail at or above the specified vulnerability severity threshold
+        # severityThreshold: "critical"
+        # Kubescape cloud account ID
+        # account: ${{secrets.KUBESCAPE_ACCOUNT}}
+```
+
 ## Inputs
 
 | Name | Description | Required |
@@ -146,6 +177,10 @@ The next important thing to note is that Kubescape only fixes the files. It does
 | verbose | Display all of the input resources and not only failed resources. Default is off | No |
 | exceptions | The JSON file containing at least one resource and one policy. Refer [exceptions](https://hub.armo.cloud/docs/exceptions) docs for more info. Objects with exceptions will be presented as exclude and not fail. | No |
 | controlsConfig | The file containing controls configuration. Use `kubescape download controls-inputs` to download the configured controls-inputs. | No |
+| image | The image you wish to scan. Launches an image scan, which cannot run together with configuration scans. | No |
+| registryUsername | Username to a private registry that hosts the scanned image. | No |
+| registryPassword | Password to a private registry that hosts the scanned image. | No |
+
 ## Examples
 
 
