@@ -1,4 +1,5 @@
-FROM quay.io/kubescape/kubescape:v2.3.8
+# TODO(vladklokun): bump to a Kubescape version with image scanning support
+FROM quay.io/kubescape/kubescape:CHANGEME
 
 # Kubescape uses root privileges for writing the results to a file
 USER root

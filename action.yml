@@ -79,6 +79,22 @@ inputs:
       use these fixes to open Pull Requests from your CI/CD pipeline.
     required: false
     default: "false"
+  image:
+    description: |
+      An image to scan.
+
+      This option runs an image scan instead of the usual configuration scan.
+
+      Example: "nginx" or "bitnami/redis" or "quay.io/kubescape/kubescape"
+    required: false
+  registryUsername:
+    description: |
+      A username for a private registry that contains the image to be scanned.
+    required: false
+  registryPassword:
+    description: |
+      A password for a private registry that contains the image to be scanned.
+    required: false
 runs:
   using: docker
   image: Dockerfile
