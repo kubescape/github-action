@@ -12,6 +12,7 @@ jobs:
     - uses: kubescape/github-action@feat-image-scanning
       with:
         image: "nginx"
+        format: "pretty-printer"
         # # Username for a private registry with the image
         # registryUsername: ${{secrets.KUBESCAPE_REGISTRY_USERNAME}}
         # # Password for a private registry with the image
