@@ -13,10 +13,8 @@ contains() {
     *) return 1 ;;
   esac
 }
-echo "INSIDE ENTRYPOINT"
 
 set -e
-
 
 # Kubescape uses the client name to make a request for checking for updates
 export KS_CLIENT="github_actions"
