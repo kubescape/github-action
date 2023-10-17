@@ -11,8 +11,8 @@ jobs:
     - uses: actions/checkout@v3
     - uses: kubescape/github-action@feat-image-scanning
       with:
-        image: "quay.io/kubescape/kubescape"
-        format: "pretty-printer"
+        image: quay.io/kubescape/kubescape
+        format: sarif
         # severityThreshold: "critical"
         # # Username for a private registry with the image
         # registryUsername: ${{secrets.KUBESCAPE_REGISTRY_USERNAME}}
