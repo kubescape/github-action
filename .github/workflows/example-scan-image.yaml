@@ -13,6 +13,7 @@ jobs:
       with:
         image: quay.io/kubescape/kubescape
         format: sarif
+        outputFile: results.sarif
         # severityThreshold: "critical"
         # # Username for a private registry with the image
         # registryUsername: ${{secrets.KUBESCAPE_REGISTRY_USERNAME}}
