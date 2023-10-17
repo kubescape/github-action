@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/busybox/sh
 
 # Checks if `string` contains `substring`.
 #
