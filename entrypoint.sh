@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/busybox/sh
 
 # Checks if `string` contains `substring`.
 #
@@ -20,7 +20,21 @@ set -e
 export KS_CLIENT="github_actions"
 
 if [ -n "${INPUT_FRAMEWORKS}" ] && [ -n "${INPUT_CONTROLS}" ]; then
-  echo "Framework and Control is specified. Please specify either one of them or neither"
+  echo "Framework and Control are specified. Please specify either one of them or neither"
+  exit 1
+fi
+
+if [ -n "${INPUT_FRAMEWORKS}" ] && [ -n "${INPUT_IMAGE}" ] || [ -n "${INPUT_CONTROLS}" ] && [ -n "${INPUT_IMAGE}" ] ; then
+  errmsg="Image and Framework / Control are specified. Kubescape does not support scanning both at the moment."
+  errmsg="${errmsg} Please specify either one of them or neither."
+  echo "${errmsg}"
+  exit 1
+fi
+
+if [ -n "${INPUT_IMAGE}" ] && [ "${INPUT_FIXFILES}" = "true" ]; then
+  errmsg="The run requests both an image scan and file fix suggestions. Kubescape does not support fixing image scan results at the moment."
+  errmsg="${errmsg} Please specify either one of them or neither."
+  echo "${errmsg}"
   exit 1
 fi
 
@@ -42,7 +56,7 @@ fi
 frameworks_cmd=$([ -n "${INPUT_FRAMEWORKS}" ] && echo "framework ${INPUT_FRAMEWORKS}" || echo "")
 controls_cmd=$([ -n "${INPUT_CONTROLS}" ] && echo control "${controls}" || echo "")
 
-files=$([ -n "${INPUT_FILES}" ] && echo "${INPUT_FILES}" || echo .)
+scan_input=$([ -n "${INPUT_FILES}" ] && echo "${INPUT_FILES}" || echo .)
 
 output_formats="${INPUT_FORMAT}"
 have_json_format="false"
@@ -96,8 +110,43 @@ severity_threshold_opt=$(
     echo ""
 )
 
+# Handle image scanning request
+image_subcmd=""
+echo "image is <${INPUT_IMAGE}>"
+if [ -n "${INPUT_IMAGE}" ]; then
+
+  # By default, assume we are not authenticated. This means we can pull public
+  # images from the container runtime daemon
+  image_arg="${INPUT_IMAGE}"
+
+  severity_threshold_opt=$(
+    [ -n "${INPUT_SEVERITYTHRESHOLD}" ] &&
+      echo --severity-threshold "${INPUT_SEVERITYTHRESHOLD}" ||
+      echo ""
+  )
+
+  auth_opts=""
+  if [ -n "${INPUT_REGISTRYUSERNAME}" ] && [ -n "${INPUT_REGISTRYPASSWORD}" ]; then
+    auth_opts="--username=${INPUT_REGISTRYUSERNAME} --password=${INPUT_REGISTRYPASSWORD}"
+
+    # When trying to authenticate, we cannot assume that the runner has access
+    # to an *authenticated* container runtime daemon, so we should always try
+    # to pull images from the registry
+    image_arg="registry://${image_arg}"
+  else
+    echo "NOTICE: Received no registry credentials, pulling without authentication."
+    printf "Hint: If you provide credentials, make sure you include both the username and password.\n\n"
+  fi
+
+  # Build the image scanning subcommand with options
+  image_subcmd="image ${auth_opts}"
+  # Override the scan input
+  scan_input="${image_arg}"
+  echo "Scan subcommand: ${image_subcmd}"
+fi
+
 # TODO: include artifacts_opt once https://github.com/kubescape/kubescape/issues/1040 is resolved
-scan_command="kubescape scan ${frameworks_cmd} ${controls_cmd} ${files} ${account_opt} ${fail_threshold_opt} ${severity_threshold_opt} --format ${output_formats} --output ${output_file} ${verbose} ${exceptions} ${controls-config}"
+scan_command="kubescape scan ${image_subcmd} ${frameworks_cmd} ${controls_cmd} ${scan_input} ${account_opt} ${fail_threshold_opt} ${severity_threshold_opt} --format ${output_formats} --output ${output_file} ${verbose} ${exceptions} ${controls_config}"
 
 echo "${scan_command}"
 eval "${scan_command}"
