@@ -151,16 +151,23 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: kubescape/github-action@main
+      continue-on-error: true
       with:
-        image: "nginx"
+        image: quay.io/kubescape/kubescape
+        format: sarif
+        outputFile: results.sarif
+        # severityThreshold: "critical"
         # # Username for a private registry with the image
         # registryUsername: ${{secrets.KUBESCAPE_REGISTRY_USERNAME}}
         # # Password for a private registry with the image
         # registryPassword: ${{secrets.KUBESCAPE_REGISTRY_PASSWORD}}
         # # Fail at or above the specified vulnerability severity threshold
-        # severityThreshold: "critical"
         # Kubescape cloud account ID
         # account: ${{secrets.KUBESCAPE_ACCOUNT}}
+    - name: Upload Kubescape scan results to Github Code Scanning
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: results.sarif
 ```
 
 ## Inputs
