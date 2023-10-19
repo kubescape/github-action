@@ -1,4 +1,4 @@
-FROM quay.io/matthiasb_1/kubescape-cli
+FROM kubescape/kubescape-cli:v2.9.2
 
 # Kubescape uses root privileges for writing the results to a file
 USER root
