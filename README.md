@@ -158,7 +158,7 @@ jobs:
         outputFile: results.sarif
         # severityThreshold: "critical"
         # # Username for a private registry with the image
-        # registryUsername: ${{secrets.KUBESCAPE_REGISTRY_USERNAME}}
+        # registryUsername: ${{secrets.REGISTRY_USERNAME}}
         # # Password for a private registry with the image
         # registryPassword: ${{secrets.KUBESCAPE_REGISTRY_PASSWORD}}
         # # Fail at or above the specified vulnerability severity threshold
