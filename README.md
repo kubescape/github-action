@@ -160,7 +160,7 @@ jobs:
         # # Username for a private registry with the image
         # registryUsername: ${{secrets.REGISTRY_USERNAME}}
         # # Password for a private registry with the image
-        # registryPassword: ${{secrets.KUBESCAPE_REGISTRY_PASSWORD}}
+        # registryPassword: ${{secrets.REGISTRY_PASSWORD}}
         # # Fail at or above the specified vulnerability severity threshold
         # Kubescape cloud account ID
         # account: ${{secrets.KUBESCAPE_ACCOUNT}}
