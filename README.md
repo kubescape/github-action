@@ -153,7 +153,7 @@ jobs:
     - uses: kubescape/github-action@main
       continue-on-error: true
       with:
-        image: quay.io/kubescape/kubescape
+        image: nginx
         format: sarif
         outputFile: results.sarif
         # severityThreshold: "critical"
