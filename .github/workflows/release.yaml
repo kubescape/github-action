@@ -31,11 +31,12 @@ jobs:
       with:
         add-paths: |
           Dockerfile
-        commit-message: "Bump kubescape version into ${{ env.latest }}"
-        title: "[Kubescape] Bump kubescape version into ${{ env.latest }}"
+        commit-message: "Bump kubescape version to ${{ env.latest }}"
+        signoff: true
+        title: "[Kubescape] Bump kubescape version to ${{ env.latest }}"
         body: |
           # Overview
-          This PR bumps the kubescape version used in this action Docker image to the latest: ${{ env.latest }}
+          This PR bumps the `kubescape` version used in this action's Docker image to version ${{ env.latest }}
         base: ${{ github.head_ref }}
         branch: kubescape-bump-${{ env.latest }}-${{ github.head_ref || github.ref_name }}
         delete-branch: true
@@ -44,4 +45,4 @@ jobs:
       uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
       with:
         tag_name: ${{ env.current }}
-        body: Bump kubescape version into ${{ env.current }}
+        body: Bump kubescape version to ${{ env.current }}
