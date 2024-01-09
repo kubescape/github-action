@@ -20,9 +20,15 @@ set -e
 export KS_CLIENT="github_actions"
 
 if [ -n "${INPUT_FRAMEWORKS}" ] && [ -n "${INPUT_CONTROLS}" ]; then
-  echo "Framework and Control are specified. Please specify either one of them or neither"
+  echo "Framework and Control are specified. Please specify either one of them"
   exit 1
 fi
+
+if [ -z "${INPUT_FRAMEWORKS}" ] && [ -z "${INPUT_CONTROLS}" ] && [ -z "${INPUT_IMAGE}" ]; then
+  echo "Neither Framework, Control nor image are specified. Please specify one of them"
+  exit 1
+fi
+
 
 if [ -n "${INPUT_FRAMEWORKS}" ] && [ -n "${INPUT_IMAGE}" ] || [ -n "${INPUT_CONTROLS}" ] && [ -n "${INPUT_IMAGE}" ] ; then
   errmsg="Image and Framework / Control are specified. Kubescape does not support scanning both at the moment."
