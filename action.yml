@@ -6,6 +6,11 @@ inputs:
       Failure threshold is the percent above which the command fails and
       returns exit code 1 (default 0 i.e, action fails if any control fails)
     required: false
+  complianceThreshold:
+    description: |
+      Compliance threshold is the percent bellow which the command fails and
+      returns exit code 1 (example: if set to 100 the command will fail if any control fails)
+    required: false
   severityThreshold:
     description: |
       Severity threshold is the severity of a failed control at or above which

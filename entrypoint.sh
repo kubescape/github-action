@@ -99,7 +99,13 @@ account_opt=$([ -n "${INPUT_ACCOUNT}" ] && echo --account "${INPUT_ACCOUNT}" || 
 artifacts_path="/home/ks/.kubescape"
 artifacts_opt=$([ -n "${INPUT_ACCOUNT}" ] && echo "" || echo --use-artifacts-from "${artifacts_path}")
 
+if [ -n "${INPUT_FAILEDTHRESHOLD}" ] && [ -n "${INPUT_COMPLIANCETHRESHOLD}" ]; then
+  echo "Both failedThreshold and complianceThreshold are specified. Please specify either one of them or neither"
+  exit 1
+fi
+
 fail_threshold_opt=$([ -n "${INPUT_FAILEDTHRESHOLD}" ] && echo --fail-threshold "${INPUT_FAILEDTHRESHOLD}" || echo "")
+compliance_threshold_opt=$([ -n "${INPUT_COMPLIANCETHRESHOLD}" ] && echo --compliance-threshold "${INPUT_COMPLIANCETHRESHOLD}" || echo "")
 
 # When a user requests to fix files, the action should not fail because the
 # results exceed severity. This is subject to change in the future.
@@ -146,7 +152,7 @@ if [ -n "${INPUT_IMAGE}" ]; then
 fi
 
 # TODO: include artifacts_opt once https://github.com/kubescape/kubescape/issues/1040 is resolved
-scan_command="kubescape scan ${image_subcmd} ${frameworks_cmd} ${controls_cmd} ${scan_input} ${account_opt} ${fail_threshold_opt} ${severity_threshold_opt} --format ${output_formats} --output ${output_file} ${verbose} ${exceptions} ${controls_config}"
+scan_command="kubescape scan ${image_subcmd} ${frameworks_cmd} ${controls_cmd} ${scan_input} ${account_opt} ${fail_threshold_opt} ${compliance_threshold_opt} ${severity_threshold_opt} --format ${output_formats} --output ${output_file} ${verbose} ${exceptions} ${controls_config}"
 
 echo "${scan_command}"
 eval "${scan_command}"
