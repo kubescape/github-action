@@ -53,13 +53,18 @@ inputs:
     required: false
   account:
     description: |
-      Account ID for the Kubescape SaaS.
-      Used for custom configuration, such as frameworks, control configuration, etc.
+      Kubescape Portal client id.
+      Use for integrating with third-party servers.
     required: false
   accessKey:
     description: |
-      AccessKey for the Kubescape SaaS.
-      Used for custom configuration, such as frameworks, control configuration, etc.
+      Kubescape Portal accessKey.
+      Use for integrating with third-party servers.
+    required: false
+  server:
+    description: |
+      Kubescape Portal URL.
+      Use for integrating with third-party servers.
     required: false
   exceptions:
     description: |
