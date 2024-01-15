@@ -28,6 +28,7 @@ jobs:
         # # Optional: Specify the Kubescape Portal credentials 
         # account: ${{secrets.KUBESCAPE_ACCOUNT}}
         # accessKey: ${{secrets.KUBESCAPE_ACCESS_KEY}}
+        # server: ${{ vars.KUBESCAPE_SERVER }}
         # # Optional: Scan a specific path. Default will scan the whole repository
         # files: "examples/*.yaml"
     - name: Upload Kubescape scan results to Github Code Scanning
@@ -67,6 +68,7 @@ jobs:
       with:
         account: ${{secrets.KUBESCAPE_ACCOUNT}}
         accessKey: ${{secrets.KUBESCAPE_ACCESS_KEY}}
+        server: ${{ vars.KUBESCAPE_SERVER }}
         files: ${{ steps.changed-files.outputs.all_changed_files }}
         fixFiles: true
         format: "sarif"
@@ -106,6 +108,7 @@ jobs:
       with:
         account: ${{secrets.KUBESCAPE_ACCOUNT}}
         accessKey: ${{secrets.KUBESCAPE_ACCESS_KEY}}
+        server: ${{ vars.KUBESCAPE_SERVER }}
         files: ${{ steps.changed-files.outputs.all_changed_files }}
         fixFiles: true
         format: "sarif"
@@ -168,6 +171,7 @@ jobs:
         # Kubescape Portal credentials
         # account: ${{secrets.KUBESCAPE_ACCOUNT}}
         # accessKey: ${{secrets.KUBESCAPE_ACCESS_KEY}}
+        # server: ${{ vars.KUBESCAPE_SERVER }}
     - name: Upload Kubescape scan results to Github Code Scanning
       uses: github/codeql-action/upload-sarif@v2
       with:
@@ -182,8 +186,9 @@ jobs:
 | outputFile | Name of the output file where the scan result will be stored without the extension. | No (default is `results`) |
 | frameworks | Security framework(s) to scan the files against. Multiple frameworks can be specified separated by a comma with no spaces. Example - `nsa,devopsbest`. Run `kubescape list frameworks` in the [Kubescape CLI](https://hub.armo.cloud/docs/installing-kubescape) to get a list of all frameworks. Either frameworks have to be specified or controls. | No |
 | controls | Security control(s) to scan the files against. Multiple controls can be specified separated by a comma with no spaces. Example - `Configured liveness probe,Pods in default namespace`. Run `kubescape list controls` in the [Kubescape CLI](https://hub.armo.cloud/docs/installing-kubescape) to get a list of all controls. You can use either the complete control name or the control ID such as `C-0001` to specify the control you want use. You must specify either the control(s) or the framework(s) you want used in the scan. | No |
-| account | Account ID for [Kubescape cloud](https://cloud.armosec.io/). Used for custom configuration, such as frameworks, control configuration, etc. | No |
-| accessKey | AccessLKey for [Kubescape cloud](https://cloud.armosec.io/). Used for custom configuration, such as frameworks, control configuration, etc. | No |
+| account | account ID for integrating with a third-party server  | No |
+| accessKey | access-key for integrating with a third-party server  | No |
+| server | URL for integrating with a third-party server | No |
 | failedThreshold | Failure threshold is the percent above which the command fails and returns exit code 1 (default 0 i.e, action fails if any control fails) | No (default 0) |
 | severityThreshold | Severity threshold is the severity of a failed control at or above which the command terminates with an exit code 1 (default is `high`, i.e. the action fails if any High severity control fails) | No |
 | verbose | Display all of the input resources and not only failed resources. Default is off | No |
@@ -218,6 +223,7 @@ jobs:
         # Specify the Kubescape cloud account ID
         account: ${{secrets.KUBESCAPE_ACCOUNT}}
         accessKey: ${{secrets.KUBESCAPE_ACCESS_KEY}}
+        server: ${{ vars.KUBESCAPE_SERVER }}
     - name: Upload Kubescape scan results to Github Code Scanning
       uses: github/codeql-action/upload-sarif@v2
       with:

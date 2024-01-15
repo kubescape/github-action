@@ -17,6 +17,7 @@ jobs:
         # Kubescape Portal credentials
         account: ${{secrets.KUBESCAPE_ACCOUNT}}
         accessKey: ${{secrets.KUBESCAPE_ACCESS_TOKEN}}
+        server: ${{ vars.KUBESCAPE_SERVER }}
         # # Optional - Scan a specific path. Default will scan all
         # files: "examples/*.yaml"
     - name: Upload Kubescape scan results to Github Code Scanning
