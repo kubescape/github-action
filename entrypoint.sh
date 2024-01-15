@@ -160,7 +160,7 @@ if [ -n "${INPUT_IMAGE}" ]; then
 fi
 
 # TODO: include artifacts_opt once https://github.com/kubescape/kubescape/issues/1040 is resolved
-scan_command="kubescape scan ${image_subcmd} ${frameworks_cmd} ${controls_cmd} ${scan_input} ${account_opt} ${access_key_opt} ${server_opt} ${account_opt} ${fail_threshold_opt} ${compliance_threshold_opt} ${severity_threshold_opt} --format ${output_formats} --output ${output_file} ${verbose} ${exceptions} ${controls_config}"
+scan_command="kubescape scan ${image_subcmd} ${frameworks_cmd} ${controls_cmd} ${scan_input} ${account_opt} ${access_key_opt} ${server_opt} ${fail_threshold_opt} ${compliance_threshold_opt} ${severity_threshold_opt} --format ${output_formats} --output ${output_file} ${verbose} ${exceptions} ${controls_config}"
 
 echo "${scan_command}"
 eval "${scan_command}"
