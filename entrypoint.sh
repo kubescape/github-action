@@ -99,6 +99,7 @@ fi
 output_file=$([ -n "${INPUT_OUTPUTFILE}" ] && echo "${INPUT_OUTPUTFILE}" || echo "results")
 
 account_opt=$([ -n "${INPUT_ACCOUNT}" ] && echo --account "${INPUT_ACCOUNT}" || echo "")
+access_key_opt=$([ -n "${INPUT_ACCESSKEY}" ] && echo --access-key "${INPUT_ACCESSKEY}" || echo "")
 
 # If account ID is empty, we load artifacts from the local path, otherwise we
 # load from the cloud (this will enable custom framework support)

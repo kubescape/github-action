@@ -22,8 +22,9 @@ jobs:
         # # Password for a private registry with the image
         # registryPassword: ${{secrets.REGISTRY_PASSWORD}}
         # # Fail at or above the specified vulnerability severity threshold
-        # Kubescape cloud account ID
+        # Kubescape Portal credentials
         # account: ${{secrets.KUBESCAPE_ACCOUNT}}
+        # accessKey: ${{secrets.KUBESCAPE_ACCESS_TOKEN}}
     - name: Upload Kubescape scan results to Github Code Scanning
       uses: github/codeql-action/upload-sarif@v2
       with:
