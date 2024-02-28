@@ -24,7 +24,7 @@ jobs:
         # # Fail at or above the specified vulnerability severity threshold
         # Kubescape Portal credentials
         # account: ${{secrets.KUBESCAPE_ACCOUNT}}
-        # accessKey: ${{secrets.KUBESCAPE_ACCESS_TOKEN}}
+        # accessKey: ${{secrets.KUBESCAPE_ACCESS_KEY}}
         # server: ${{ vars.KUBESCAPE_SERVER }}
     - name: Upload Kubescape scan results to Github Code Scanning
       uses: github/codeql-action/upload-sarif@v2
