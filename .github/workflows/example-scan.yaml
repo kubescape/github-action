@@ -16,7 +16,7 @@ jobs:
         outputFile: results.sarif
         # Kubescape Portal credentials
         account: ${{secrets.KUBESCAPE_ACCOUNT}}
-        accessKey: ${{secrets.KUBESCAPE_ACCESS_TOKEN}}
+        accessKey: ${{secrets.KUBESCAPE_ACCESS_KEY}}
         server: ${{ vars.KUBESCAPE_SERVER }}
         # # Optional - Scan a specific path. Default will scan all
         # files: "examples/*.yaml"

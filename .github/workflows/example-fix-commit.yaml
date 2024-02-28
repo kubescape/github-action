@@ -20,7 +20,7 @@ jobs:
     - uses: kubescape/github-action@main
       with:
         account: ${{ secrets.KUBESCAPE_ACCOUNT }}
-        accessKey: ${{ secrets.KUBESCAPE_ACCESS_TOKEN }}
+        accessKey: ${{ secrets.KUBESCAPE_ACCESS_KEY }}
         server: ${{ vars.KUBESCAPE_SERVER }}
         files: ${{ steps.changed-files.outputs.all_changed_files }}
         fixFiles: true
