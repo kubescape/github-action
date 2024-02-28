@@ -142,7 +142,7 @@ The next important thing to note is that Kubescape only fixes the files. It does
 
 The Kubescape Github Action is also able to scan images. But you should be aware that image scanning cannot run in parallel with configuration scanning and file fixing at the moment. If you would like to run both image and configuration scanning, you should define at least two separate steps with the same action but different arguments: one for image scanning and the other for configuration scanning.
 
-To scan a container image with a Kubescape Github Action, use the following workflow definition, keeping in mind that you need to replace `image: "nginx"` with the appropriate image name:
+To scan a container image with a Kubescape Github Action, use the following workflow definition, keeping in mind that you need to replace `image: "quay.io/kubescape/kubescape"` with the appropriate image name:
 
 ```yaml
 name: Kubescape scanning for image vulnerabilities
