@@ -146,7 +146,7 @@ if [ -n "${INPUT_IMAGE}" ]; then
     # When trying to authenticate, we cannot assume that the runner has access
     # to an *authenticated* container runtime daemon, so we should always try
     # to pull images from the registry
-    image_arg="registry://${image_arg}"
+    # image_arg="registry://${image_arg}"
   else
     echo "NOTICE: Received no registry credentials, pulling without authentication."
     printf "Hint: If you provide credentials, make sure you include both the username and password.\n\n"
