@@ -1,12 +1,23 @@
-git clone https://github.com/kubescape/kubescape.git --no-checkout
-cd kubescape
-export LATEST=$(git for-each-ref --format="%(refname:short)" --sort=-authordate --count=1 refs/tags)
-cd ..
-rm -rf kubescape
-export CURRENT=$(cat Dockerfile | head -n1 | cut -d':' -f2)
-if [ "$LATEST" != "$CURRENT" ]; then
-    echo "New version available: $LATEST"
-    sed -i "1 s/:${CURRENT}/:${LATEST}/" Dockerfile
+#!/bin/sh
+
+set -e
+
+echo "Fetching the latest version of Kubescape..."
+# Use GITHUB_TOKEN if available for authenticated requests
+if [ -n "$GITHUB_TOKEN" ]; then
+    latest_version=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" "https://api.github.com/repos/kubescape/kubescape/releases/latest" | grep -o '"tag_name": "[^"]*' | cut -d'"' -f4)
 else
-    echo "No new version available"
+    latest_version=$(curl -s "https://api.github.com/repos/kubescape/kubescape/releases/latest" | grep -o '"tag_name": "[^"]*' | cut -d'"' -f4)
 fi
+
+if [ -z "${latest_version}" ]; then
+    echo "Failed to fetch the latest version."
+    exit 1
+fi
+
+echo "Latest version is: ${latest_version}"
+
+echo "Updating Dockerfile..."
+sed -i "s/^\(ARG KUBESCAPE_VERSION=\).*/\1${latest_version}/" Dockerfile
+
+echo "Dockerfile has been updated."
