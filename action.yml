@@ -94,6 +94,12 @@ inputs:
       use these fixes to open Pull Requests from your CI/CD pipeline.
     required: false
     default: "false"
+  version:
+    description: |
+      The version of Kubescape to use.
+
+      Can be a specific version (e.g. "v3.0.21") or "latest".
+    required: true
   image:
     description: |
       An image to scan.
@@ -111,7 +117,44 @@ inputs:
       A password for a private registry that contains the image to be scanned.
     required: false
 runs:
-  using: docker
-  image: Dockerfile
-  # image: docker://quay.io/kubescape/github-actions
-
+  using: 'composite'
+  steps:
+    - id: resolve_version
+      shell: bash
+      run: |
+        VERSION="${{ inputs.version }}"
+        if [ "$VERSION" = "latest" ]; then
+          VERSION=$(curl -s -H "Authorization: Bearer ${{ github.token }}" https://api.github.com/repos/kubescape/kubescape/releases/latest | jq -r .tag_name)
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+    - name: Build Kubescape container
+      shell: bash
+      run: |
+        docker build -t kubescape-action:${{ steps.resolve_version.outputs.version }} \
+          --build-arg KUBESCAPE_VERSION=${{ steps.resolve_version.outputs.version }} \
+          ${{ github.action_path }}
+    - name: Run Kubescape scan
+      shell: bash
+      run: |
+        docker run --rm \
+          -v ${{ github.workspace }}:/scan \
+          -w /scan \
+          -e INPUT_FAILEDTHRESHOLD="${{ inputs.failedThreshold }}" \
+          -e INPUT_COMPLIANCETHRESHOLD="${{ inputs.complianceThreshold }}" \
+          -e INPUT_SEVERITYTHRESHOLD="${{ inputs.severityThreshold }}" \
+          -e INPUT_FILES="${{ inputs.files }}" \
+          -e INPUT_OUTPUTFILE="${{ inputs.outputFile }}" \
+          -e INPUT_VERBOSE="${{ inputs.verbose }}" \
+          -e INPUT_FRAMEWORKS="${{ inputs.frameworks }}" \
+          -e INPUT_CONTROLS="${{ inputs.controls }}" \
+          -e INPUT_CONTROLSCONFIG="${{ inputs.controlsConfig }}" \
+          -e INPUT_ACCOUNT="${{ inputs.account }}" \
+          -e INPUT_ACCESSKEY="${{ inputs.accessKey }}" \
+          -e INPUT_SERVER="${{ inputs.server }}" \
+          -e INPUT_EXCEPTIONS="${{ inputs.exceptions }}" \
+          -e INPUT_FORMAT="${{ inputs.format }}" \
+          -e INPUT_FIXFILES="${{ inputs.fixFiles }}" \
+          -e INPUT_IMAGE="${{ inputs.image }}" \
+          -e INPUT_REGISTRYUSERNAME="${{ inputs.registryUsername }}" \
+          -e INPUT_REGISTRYPASSWORD="${{ inputs.registryPassword }}" \
+          kubescape-action:${{ steps.resolve_version.outputs.version }}
