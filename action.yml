@@ -139,10 +139,12 @@ runs:
       run: |
         docker run --rm \
           -e GITHUB_ACTIONS=true \
-          -e GITHUB_WORKSPACE=${{ github.workspace }} \
+          -e GITHUB_WORKSPACE=/github/workspace \
           -e GITHUB_REPOSITORY=${{ github.repository }} \
-          -v ${{ github.workspace }}:${{ github.workspace }} \
-          -w ${{ github.workspace }} \
+          -e GITHUB_REF=${{ github.ref }} \
+          -e GITHUB_SHA=${{ github.sha }} \
+          -v ${{ github.workspace }}:/github/workspace \
+          -w /github/workspace \
           -e INPUT_FAILEDTHRESHOLD="${{ inputs.failedThreshold }}" \
           -e INPUT_COMPLIANCETHRESHOLD="${{ inputs.complianceThreshold }}" \
           -e INPUT_SEVERITYTHRESHOLD="${{ inputs.severityThreshold }}" \
