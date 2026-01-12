@@ -197,6 +197,7 @@ jobs:
 | image | The image you wish to scan. Launches an image scan, which cannot run together with configuration scans. | No |
 | registryUsername | Username to a private registry that hosts the scanned image. | No |
 | registryPassword | Password to a private registry that hosts the scanned image. | No |
+| version | The version of Kubescape to use. Can be a specific version (e.g. "v3.0.21") or "latest". | No (default is `latest`) |
 
 ## Examples
 
