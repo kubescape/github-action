@@ -17,9 +17,8 @@ export KS_CLIENT="github_actions"
 if [ -d "/github/workspace" ]; then
   git config --global --add safe.directory /github/workspace || true
   cd /github/workspace
-  if [ ! -d ".git" ]; then
-    echo "Warning: .git directory not found. Kubescape may use absolute paths."
-  fi
+  echo "Git status in /github/workspace:"
+  git status || echo "Git not available or not a repository."
 fi
 
 if [ -n "${INPUT_FRAMEWORKS}" ] && [ -n "${INPUT_CONTROLS}" ]; then
@@ -97,28 +96,24 @@ eval "${scan_command}"
 # Post-processing for SARIF to ensure relative paths
 if contains "${output_formats}" "sarif"; then
   actual_sarif="${output_file}"
-  # Handle cases where kubescape might append .sarif
   if [ ! -f "${actual_sarif}" ] && [ -f "${output_file}.sarif" ]; then
     actual_sarif="${output_file}.sarif"
   fi
   
   if [ -f "${actual_sarif}" ]; then
-    echo "Normalizing paths in ${actual_sarif}..."
-    # 1. Remove absolute path prefix
-    sed -i 's|"/github/workspace/|"/|g' "${actual_sarif}"
-    sed -i 's|file:///github/workspace/|file:///|g' "${actual_sarif}"
-    # 2. Convert absolute paths (starting with /) to relative paths
-    sed -i 's|": "/|": "|g' "${actual_sarif}"
-    sed -i 's|file:///|file://|g' "${actual_sarif}"
-    sed -i 's|file://|file:|g' "${actual_sarif}"
-    sed -i 's|file:| |g' "${actual_sarif}" # Remove file: scheme entirely if it exists
-    sed -i 's|": "./|": "|g' "${actual_sarif}"
-    
-    # Final trim to ensure no leading spaces or weirdness in URIs
-    sed -i 's|": "|": "|g' "${actual_sarif}"
+    echo "Normalizing paths in ${actual_sarif} using jq..."
+    # 1. Use jq to walk through the object and fix any field named "uri"
+    # It removes protocols and absolute workspace paths
+    jq 'walk(if type == "object" and has("uri") and (.uri | type == "string") then 
+          .uri |= sub("^file:///github/workspace/"; "") | 
+          .uri |= sub("^/github/workspace/"; "") | 
+          .uri |= sub("^file://"; "") |
+          .uri |= sub("^/"; "") |
+          .uri |= sub("^./"; "") 
+        else . end)' "${actual_sarif}" > "${actual_sarif}.tmp" && mv "${actual_sarif}.tmp" "${actual_sarif}"
     
     echo "Path normalization complete. Snippet of results:"
-    grep -A 5 "physicalLocation" "${actual_sarif}" | head -n 20 || echo "No results found in SARIF."
+    jq 'if .runs[].results then .runs[].results[].locations[].physicalLocation.artifactLocation.uri else "No results" end' "${actual_sarif}" | head -n 20
   else
     echo "Warning: SARIF file ${output_file} not found."
   fi
