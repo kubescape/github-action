@@ -44,7 +44,7 @@ inputs:
   controls:
     description: |
       List of all controls to scan. Run kubescape list controls with the
-      Kubescape CLI to get a list of all controls. Either frameworks
+      Kubescape CLI to get a list of all frameworks. Either frameworks
       have to be specified or controls.
     required: false
   controlsConfig:
@@ -100,6 +100,7 @@ inputs:
 
       Can be a specific version (e.g. "v3.0.21") or "latest".
     required: true
+    default: latest
   image:
     description: |
       An image to scan.
