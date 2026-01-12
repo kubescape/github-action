@@ -19,6 +19,7 @@ jobs:
       uses: tj-actions/changed-files@v35
     - uses: kubescape/github-action@main
       with:
+        version: latest
         account: ${{ secrets.KUBESCAPE_ACCOUNT }}
         accessKey: ${{ secrets.KUBESCAPE_ACCESS_KEY }}
         server: ${{ vars.KUBESCAPE_SERVER }}

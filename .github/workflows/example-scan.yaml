@@ -12,6 +12,7 @@ jobs:
     - uses: kubescape/github-action@main
       continue-on-error: true
       with:
+        version: latest
         format: sarif
         outputFile: results.sarif
         # Kubescape Portal credentials

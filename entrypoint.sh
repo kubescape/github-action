@@ -25,7 +25,7 @@ if [ -n "${INPUT_FRAMEWORKS}" ] && [ -n "${INPUT_CONTROLS}" ]; then
 fi
 
 if [ -z "${INPUT_FRAMEWORKS}" ] && [ -z "${INPUT_CONTROLS}" ] && [ -z "${INPUT_IMAGE}" ]; then
-  echo "Scannign scope is not specified. Scanning all frameworks"
+  echo "Scanning scope is not specified. Scanning all frameworks"
   INPUT_FRAMEWORKS="all"
 fi
 

@@ -12,6 +12,7 @@ jobs:
     - uses: kubescape/github-action@main
       continue-on-error: true
       with:
+        version: latest
         image: quay.io/kubescape/kubescape:v3.0.3
         format: sarif
         outputFile: results.sarif
