@@ -1,4 +1,4 @@
-#!/busybox/sh
+#!/bin/bash
 
 # Checks if `string` contains `substring`.
 #
