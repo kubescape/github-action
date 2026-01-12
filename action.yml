@@ -138,6 +138,9 @@ runs:
       shell: bash
       run: |
         docker run --rm \
+          -e GITHUB_ACTIONS=true \
+          -e GITHUB_WORKSPACE=/scan \
+          -e GITHUB_REPOSITORY=${{ github.repository }} \
           -v ${{ github.workspace }}:/scan \
           -w /scan \
           -e INPUT_FAILEDTHRESHOLD="${{ inputs.failedThreshold }}" \
