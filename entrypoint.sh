@@ -13,9 +13,13 @@ set -e
 # Kubescape uses the client name to make a request for checking for updates
 export KS_CLIENT="github_actions"
 
-# Mark workspace as safe for git
+# Mark workspace as safe for git and try to initialize git info
 if [ -d "/github/workspace" ]; then
   git config --global --add safe.directory /github/workspace || true
+  cd /github/workspace
+  if [ ! -d ".git" ]; then
+    echo "Warning: .git directory not found. Kubescape may use absolute paths."
+  fi
 fi
 
 if [ -n "${INPUT_FRAMEWORKS}" ] && [ -n "${INPUT_CONTROLS}" ]; then
@@ -92,19 +96,31 @@ eval "${scan_command}"
 
 # Post-processing for SARIF to ensure relative paths
 if contains "${output_formats}" "sarif"; then
-  # Kubescape might append .sarif if it's not there, or use exactly what's provided
   actual_sarif="${output_file}"
+  # Handle cases where kubescape might append .sarif
   if [ ! -f "${actual_sarif}" ] && [ -f "${output_file}.sarif" ]; then
     actual_sarif="${output_file}.sarif"
   fi
   
   if [ -f "${actual_sarif}" ]; then
-    echo "Normalizing paths in ${actual_sarif}"
-    # Remove absolute path prefixes to make them relative to repo root
-    sed -i "s|/github/workspace/||g" "${actual_sarif}"
-    sed -i "s|file:///github/workspace/||g" "${actual_sarif}"
-    # Also handle the case where it might be just /github/workspace (no trailing slash)
-    sed -i "s|/github/workspace||g" "${actual_sarif}"
+    echo "Normalizing paths in ${actual_sarif}..."
+    # 1. Remove absolute path prefix
+    sed -i 's|"/github/workspace/|"/|g' "${actual_sarif}"
+    sed -i 's|file:///github/workspace/|file:///|g' "${actual_sarif}"
+    # 2. Convert absolute paths (starting with /) to relative paths
+    sed -i 's|": "/|": "|g' "${actual_sarif}"
+    sed -i 's|file:///|file://|g' "${actual_sarif}"
+    sed -i 's|file://|file:|g' "${actual_sarif}"
+    sed -i 's|file:| |g' "${actual_sarif}" # Remove file: scheme entirely if it exists
+    sed -i 's|": "./|": "|g' "${actual_sarif}"
+    
+    # Final trim to ensure no leading spaces or weirdness in URIs
+    sed -i 's|": "|": "|g' "${actual_sarif}"
+    
+    echo "Path normalization complete. Snippet of results:"
+    grep -A 5 "physicalLocation" "${actual_sarif}" | head -n 20 || echo "No results found in SARIF."
+  else
+    echo "Warning: SARIF file ${output_file} not found."
   fi
 fi
 
