@@ -99,7 +99,8 @@ inputs:
       The version of Kubescape to use.
 
       Can be a specific version (e.g. "v3.0.21") or "latest".
-    required: true
+    required: false
+    default: "latest"
   image:
     description: |
       An image to scan.
