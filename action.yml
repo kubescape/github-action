@@ -51,6 +51,11 @@ inputs:
     description: |
       Path to the file containing controls configuration.
     required: false
+  artifacts:
+    description: |
+      Workspace-relative path to a vendored Kubescape artifacts directory.
+      The directory is used as the policy source for configuration scans.
+    required: false
   account:
     description: |
       Kubescape Portal client id.
@@ -154,6 +159,7 @@ runs:
           -e INPUT_FRAMEWORKS="${{ inputs.frameworks }}" \
           -e INPUT_CONTROLS="${{ inputs.controls }}" \
           -e INPUT_CONTROLSCONFIG="${{ inputs.controlsConfig }}" \
+          -e INPUT_ARTIFACTS="${{ inputs.artifacts }}" \
           -e INPUT_ACCOUNT="${{ inputs.account }}" \
           -e INPUT_ACCESSKEY="${{ inputs.accessKey }}" \
           -e INPUT_SERVER="${{ inputs.server }}" \

@@ -56,6 +56,34 @@ fi
 
 exceptions=$([ -n "$INPUT_EXCEPTIONS" ] && echo "--exceptions ${INPUT_EXCEPTIONS}" || echo "")
 controls_config=$([ -n "$INPUT_CONTROLSCONFIG" ] && echo "--controls-config ${INPUT_CONTROLSCONFIG}" || echo "")
+artifacts_opt=""
+if [ -n "${INPUT_ARTIFACTS}" ]; then
+  case "${INPUT_ARTIFACTS}" in
+    /*)
+      echo "Artifacts path must be relative to the GitHub workspace"
+      exit 1
+      ;;
+  esac
+  if [ -n "${INPUT_IMAGE}" ]; then
+    echo "Artifacts cannot be used with image scans"
+    exit 1
+  fi
+  if [ ! -d "${INPUT_ARTIFACTS}" ]; then
+    echo "Artifacts directory '${INPUT_ARTIFACTS}' does not exist"
+    exit 1
+  fi
+
+  workspace_path=$(pwd -P)
+  resolved_artifacts_path=$(cd -- "${INPUT_ARTIFACTS}" && pwd -P)
+  case "${resolved_artifacts_path}" in
+    "${workspace_path}"|"${workspace_path}"/*) ;;
+    *)
+      echo "Artifacts directory must resolve inside the GitHub workspace"
+      exit 1
+      ;;
+  esac
+  printf -v artifacts_opt ' --use-artifacts-from %q' "${resolved_artifacts_path}"
+fi
 account_opt=$([ -n "${INPUT_ACCOUNT}" ] && echo --account "${INPUT_ACCOUNT}" || echo "")
 access_key_opt=$([ -n "${INPUT_ACCESSKEY}" ] && echo --access-key "${INPUT_ACCESSKEY}" || echo "")
 server_opt=$([ -n "${INPUT_SERVER}" ] && echo --server "${INPUT_SERVER}" || echo "")
@@ -86,7 +114,7 @@ if [ -n "${INPUT_IMAGE}" ]; then
   scan_input="${image_arg}"
 fi
 
-scan_command="kubescape scan ${image_subcmd} ${frameworks_cmd} ${controls_cmd} ${scan_input} ${account_opt} ${access_key_opt} ${server_opt} ${fail_threshold_opt} ${compliance_threshold_opt} ${severity_threshold_opt} --format ${output_formats} --output ${output_file} ${verbose} ${exceptions} ${controls_config}"
+scan_command="kubescape scan ${image_subcmd} ${frameworks_cmd} ${controls_cmd} ${scan_input} ${account_opt} ${access_key_opt} ${server_opt} ${fail_threshold_opt} ${compliance_threshold_opt} ${severity_threshold_opt} --format ${output_formats} --output ${output_file} ${verbose} ${exceptions} ${controls_config}${artifacts_opt}"
 
 echo "Running: ${scan_command}"
 eval "${scan_command}"

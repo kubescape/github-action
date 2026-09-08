@@ -194,6 +194,7 @@ jobs:
 | verbose | Display all of the input resources and not only failed resources. Default is off | No |
 | exceptions | The JSON file containing at least one resource and one policy. Refer [exceptions](https://hub.armo.cloud/docs/exceptions) docs for more info. Objects with exceptions will be presented as exclude and not fail. | No |
 | controlsConfig | The file containing controls configuration. Use `kubescape download controls-inputs` to download the configured controls-inputs. | No |
+| artifacts | Workspace-relative path to a vendored Kubescape artifacts directory. The directory must resolve inside the workspace and cannot be used with `image`. | No |
 | image | The image you wish to scan. Launches an image scan, which cannot run together with configuration scans. | No |
 | registryUsername | Username to a private registry that hosts the scanned image. | No |
 | registryPassword | Password to a private registry that hosts the scanned image. | No |
@@ -201,7 +202,33 @@ jobs:
 
 ## Examples
 
-> **Note:** The `version` input defaults to `latest`, so it is omitted from the examples below. For reproducible scans, pin a specific Kubescape release with e.g. `version: v3.0.21`.
+> **Note:** The `version` input defaults to `latest`, but pinning a Kubescape version alone does not pin the policy library used by a scan. Use a reviewed artifact bundle as described below when policy stability is required.
+
+### Reproducible policy evaluation
+
+Create the artifacts outside the CI run, review them, and commit the directory alongside the manifests that will be scanned:
+
+```bash
+kubescape download artifacts --output kubescape-artifacts
+```
+
+Then pin the action commit and Kubescape version, and scan a path that does not contain the artifact JSON files:
+
+```yaml
+- uses: actions/checkout@v3
+- uses: kubescape/github-action@<full-commit-sha>
+  with:
+    version: v4.0.13
+    frameworks: nsa
+    files: manifests/
+    artifacts: kubescape-artifacts/
+```
+
+The `artifacts` path must be relative to the checked-out workspace and must resolve inside it. Downloading the bundle during every CI run would fetch the current policy library again and defeat policy reproducibility.
+
+The bundle includes `exceptions.json` and `controls-inputs.json`. Kubescape v4.0.13 prefers explicit `exceptions` and `controlsConfig` inputs when they are supplied together with `artifacts`; older versions such as v3.0.21 prefer the files in the artifact bundle. When `account`, `accessKey`, or `server` are also supplied, they are still forwarded, but the vendored artifacts remain the policy source. Ensure that any required custom policies are present in the bundle.
+
+Pinning the action commit, Kubescape version, scanned manifests, and reviewed artifact bundle makes policy and rule evaluation reproducible. It does not make the entire container build reproducible because the action currently retrieves Kubescape's installer separately.
 
 #### Scan and submit results to the [Kubescape Cloud](https://cloud.armosec.io/)
 
@@ -344,4 +371,3 @@ jobs:
         with:
           sarif_file: results.sarif
 ```
-
