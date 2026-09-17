@@ -42,10 +42,13 @@ STUB
 chmod +x "${bin_dir}/docker"
 
 artifact_input='artifacts;touch PWNED'
-if PATH="${bin_dir}:${PATH}" \
-  DOCKER_ARGS_FILE="${args_file}" \
-  INPUT_ARTIFACTS="${artifact_input}" \
-  bash "${run_script}" &&
+if (
+  cd "${test_root}" &&
+    PATH="${bin_dir}:${PATH}" \
+    DOCKER_ARGS_FILE="${args_file}" \
+    INPUT_ARTIFACTS="${artifact_input}" \
+    bash "${run_script}"
+) &&
   grep -Fxq -- "INPUT_ARTIFACTS=${artifact_input}" "${args_file}" &&
   [ ! -e "${test_root}/PWNED" ]; then
   pass "composite action keeps artifact input data-only"
