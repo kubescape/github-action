@@ -141,6 +141,8 @@ runs:
           ${{ github.action_path }}
     - name: Run Kubescape scan
       shell: bash
+      env:
+        INPUT_ARTIFACTS: ${{ inputs.artifacts }}
       run: |
         docker run --rm \
           -e GITHUB_ACTIONS=true \
@@ -159,7 +161,7 @@ runs:
           -e INPUT_FRAMEWORKS="${{ inputs.frameworks }}" \
           -e INPUT_CONTROLS="${{ inputs.controls }}" \
           -e INPUT_CONTROLSCONFIG="${{ inputs.controlsConfig }}" \
-          -e INPUT_ARTIFACTS="${{ inputs.artifacts }}" \
+          -e INPUT_ARTIFACTS="$INPUT_ARTIFACTS" \
           -e INPUT_ACCOUNT="${{ inputs.account }}" \
           -e INPUT_ACCESSKEY="${{ inputs.accessKey }}" \
           -e INPUT_SERVER="${{ inputs.server }}" \

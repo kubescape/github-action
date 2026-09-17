@@ -17,3 +17,5 @@ jobs:
         run: bash -n entrypoint.sh
       - name: Run entrypoint tests
         run: bash tests/entrypoint_test.sh
+      - name: Run action command-construction tests
+        run: bash tests/action_test.sh

@@ -53,14 +53,20 @@ jobs:
   kubescape-fix-pr-reviews:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pull-requests: write
 
     steps:
-    - uses: actions/checkout@v3
+    # This workflow only scans the checked-out manifests; it does not execute
+    # code from the pull request. Keep the explicit opt-in visible because
+    # pull_request_target otherwise refuses fork pull request checkouts.
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 0
-        ref: ${{github.event.pull_request.head.ref}}
+        ref: ${{github.event.pull_request.head.sha}}
         repository: ${{github.event.pull_request.head.repo.full_name}}
+        persist-credentials: false
+        allow-unsafe-pr-checkout: true
     - name: Get changed files
       id: changed-files
       uses: tj-actions/changed-files@v35
