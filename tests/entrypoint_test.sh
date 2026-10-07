@@ -34,7 +34,8 @@ STUB
   chmod +x "${bin_dir}/kubescape"
 
   unset INPUT_ACCESSKEY INPUT_ACCOUNT INPUT_ARTIFACTS INPUT_CONTROLSCONFIG
-  unset INPUT_EXCEPTIONS INPUT_IMAGE INPUT_SERVER
+  unset INPUT_EXCEPTIONS INPUT_IMAGE INPUT_SERVER INPUT_FILES
+  unset INPUT_FRAMEWORKS INPUT_CONTROLS INPUT_REGISTRYUSERNAME INPUT_REGISTRYPASSWORD
 }
 
 run_entrypoint() {
@@ -46,18 +47,18 @@ run_entrypoint() {
       INPUT_ACCOUNT="${INPUT_ACCOUNT:-}" \
       INPUT_ARTIFACTS="${INPUT_ARTIFACTS:-}" \
       INPUT_COMPLIANCETHRESHOLD="" \
-      INPUT_CONTROLS="" \
+      INPUT_CONTROLS="${INPUT_CONTROLS:-}" \
       INPUT_CONTROLSCONFIG="${INPUT_CONTROLSCONFIG:-}" \
       INPUT_EXCEPTIONS="${INPUT_EXCEPTIONS:-}" \
       INPUT_FAILEDTHRESHOLD="" \
-      INPUT_FILES="manifests" \
+      INPUT_FILES="${INPUT_FILES:-manifests}" \
       INPUT_FIXFILES="false" \
       INPUT_FORMAT="pretty-printer" \
-      INPUT_FRAMEWORKS="nsa" \
+      INPUT_FRAMEWORKS="${INPUT_FRAMEWORKS-nsa}" \
       INPUT_IMAGE="${INPUT_IMAGE:-}" \
       INPUT_OUTPUTFILE="results" \
-      INPUT_REGISTRYPASSWORD="" \
-      INPUT_REGISTRYUSERNAME="" \
+      INPUT_REGISTRYPASSWORD="${INPUT_REGISTRYPASSWORD:-}" \
+      INPUT_REGISTRYUSERNAME="${INPUT_REGISTRYUSERNAME:-}" \
       INPUT_SERVER="${INPUT_SERVER:-}" \
       INPUT_SEVERITYTHRESHOLD="" \
       INPUT_VERBOSE="false" \
@@ -242,6 +243,88 @@ test_artifact_path_cannot_inject_commands() {
   fi
 }
 
+# Shell punctuation and substitutions must remain literal arguments.
+test_files_cannot_inject_commands() {
+  new_case files_injection
+  INPUT_FILES='evil\"; touch PWNED; #.yaml $(touch PWNED)'
+  if run_entrypoint && [ ! -e "${workspace}/PWNED" ] &&
+    grep -Fxq -- 'evil\";' "${args_file}" &&
+    grep -Fxq -- '$(touch' "${args_file}"; then
+    pass "file input cannot execute shell syntax"
+  else
+    fail "file input cannot execute shell syntax"
+  fi
+}
+
+# Preserve ordinary multi-file scopes and comma-separated control names.
+test_scan_scopes() {
+  new_case scopes
+  INPUT_FILES='manifests/one.yaml manifests/two.yaml'
+  INPUT_FRAMEWORKS='nsa mitre'
+  if run_entrypoint && grep -Fxq -- 'nsa' "${args_file}" &&
+    grep -Fxq -- 'mitre' "${args_file}" &&
+    grep -Fxq -- 'manifests/one.yaml' "${args_file}" &&
+    grep -Fxq -- 'manifests/two.yaml' "${args_file}"; then
+    pass "frameworks and file lists retain their arguments"
+  else
+    fail "frameworks and file lists retain their arguments"
+  fi
+  INPUT_FRAMEWORKS=''
+  INPUT_CONTROLS='Control one,Control two'
+  if run_entrypoint && grep -Fxq -- 'control' "${args_file}" &&
+    grep -Fxq -- "$INPUT_CONTROLS" "${args_file}"; then
+    pass "control names remain one comma-separated argument"
+  else
+    fail "control names remain one comma-separated argument"
+  fi
+}
+
+# Credentials must stay literal and must not be printed in the scan log.
+test_credentials_cannot_inject_commands() {
+  new_case credential_injection
+  INPUT_IMAGE='nginx:latest'
+  INPUT_REGISTRYUSERNAME='user name'
+  INPUT_REGISTRYPASSWORD='$(touch PWNED); secret'
+  INPUT_ACCESSKEY='$(touch PWNED); key'
+  if run_entrypoint && [ ! -e "${workspace}/PWNED" ] &&
+    grep -Fxq -- "--password=$INPUT_REGISTRYPASSWORD" "${args_file}" &&
+    grep -Fxq -- "$INPUT_ACCESSKEY" "${args_file}" &&
+    ! grep -Fq -- "$INPUT_REGISTRYPASSWORD" "${output_file}" &&
+    ! grep -Fq -- "$INPUT_ACCESSKEY" "${output_file}"; then
+    pass "image credentials and access keys remain literal and private"
+  else
+    fail "image credentials and access keys remain literal and private"
+  fi
+}
+
+# Patterns must match files while treating matched filenames as literal data.
+test_globs_and_multiline_scopes() {
+  new_case glob
+  evil_name='evil"; touch PWNED; #.yaml'
+  touch "${workspace}/manifests/${evil_name}" "${workspace}/manifests/normal.yaml"
+  INPUT_FILES='manifests/*.yaml'
+  INPUT_FRAMEWORKS=$'nsa\nmitre'
+  if run_entrypoint && [ ! -e "${workspace}/PWNED" ] &&
+    grep -Fxq -- "manifests/${evil_name}" "${args_file}" &&
+    grep -Fxq -- 'manifests/normal.yaml' "${args_file}" &&
+    grep -Fxq -- 'mitre' "${args_file}"; then
+    pass "glob matches and multiline frameworks remain literal arguments"
+  else
+    fail "glob matches and multiline frameworks remain literal arguments"
+  fi
+  mkdir -p "${workspace}/manifests with spaces"
+  INPUT_FILES='manifests with spaces'
+  if run_entrypoint && grep -Fxq -- "$INPUT_FILES" "${args_file}"; then
+    pass "a single existing file path can contain spaces"
+  else
+    fail "a single existing file path can contain spaces"
+  fi
+}
+
+test_globs_and_multiline_scopes
+test_scan_scopes
+test_credentials_cannot_inject_commands
+test_files_cannot_inject_commands
 test_default_command_is_unchanged
 test_artifacts_are_forwarded_once
 test_artifact_path_with_spaces_is_one_argument

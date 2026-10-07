@@ -1,5 +1,0 @@
-paths:
-  .github/workflows/example-fix-pr-review.yaml:
-    ignore:
-      # actionlint 1.7.12 metadata predates this actions/checkout input.
-      - 'input "allow-unsafe-pr-checkout" is not defined in action "actions/checkout@v5"'

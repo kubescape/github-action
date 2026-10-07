@@ -1,38 +1,52 @@
 name: Suggest autofixes with Kubescape for PR by reviews
 on:
-  pull_request_target:
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   kubescape-fix-pr-reviews:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-
     steps:
-    # This workflow only scans the checked-out manifests; it does not execute
-    # code from the pull request. Keep the explicit opt-in visible because
-    # pull_request_target otherwise refuses fork pull request checkouts.
     - uses: actions/checkout@v5
       with:
         fetch-depth: 0
-        ref: ${{github.event.pull_request.head.sha}}
-        repository: ${{github.event.pull_request.head.repo.full_name}}
+        ref: ${{ github.event.pull_request.head.sha }}
         persist-credentials: false
-        allow-unsafe-pr-checkout: true
-    - name: Get changed files
-      id: changed-files
-      uses: tj-actions/changed-files@v35
+    # Scan the workspace rather than interpolating changed filenames into inputs.
+    # Fork contents are analyzed without repository secrets or write permissions.
     - uses: kubescape/github-action@main
       with:
-        account: ${{secrets.KUBESCAPE_ACCOUNT}}
-        accessKey: ${{secrets.KUBESCAPE_ACCESS_KEY}}
-        server: ${{ vars.KUBESCAPE_SERVER }}
-        files: ${{ steps.changed-files.outputs.all_changed_files }}
+        files: .
         fixFiles: true
         format: "sarif"
+    - name: Save scan results
+      if: always()
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      with:
+        name: kubescape-pr-results
+        path: |
+          results.sarif
+          results.json
+        if-no-files-found: error
+
+  publish-reviews:
+    needs: kubescape-fix-pr-reviews
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+        persist-credentials: false
+    - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      with:
+        name: kubescape-pr-results
     - name: PR Suggester according to SARIF file
-      if: github.event_name == 'pull_request_target'
       uses: HollowMan6/sarif4reviewdog@v1.0.0
       with:
         file: 'results.sarif'

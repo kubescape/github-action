@@ -42,51 +42,65 @@ You can then see the results in the Pull Request that triggered the scan and the
 
 ### Automatically Suggest Fixes
 
-To make Kubescape automatically suggest fixes to your pull requests by code review, use the following workflow:
+To scan pull requests and suggest fixes on branches in the same repository, use the following workflow:
 
 ```yaml
 name: Suggest autofixes with Kubescape for PR by reviews
 on:
-  pull_request_target:
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   kubescape-fix-pr-reviews:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-
     steps:
-    # This workflow only scans the checked-out manifests; it does not execute
-    # code from the pull request. Keep the explicit opt-in visible because
-    # pull_request_target otherwise refuses fork pull request checkouts.
     - uses: actions/checkout@v5
       with:
         fetch-depth: 0
-        ref: ${{github.event.pull_request.head.sha}}
-        repository: ${{github.event.pull_request.head.repo.full_name}}
+        ref: ${{ github.event.pull_request.head.sha }}
         persist-credentials: false
-        allow-unsafe-pr-checkout: true
-    - name: Get changed files
-      id: changed-files
-      uses: tj-actions/changed-files@v35
+    # Scan the workspace rather than interpolating changed filenames into inputs.
+    # Fork contents are analyzed without repository secrets or write permissions.
     - uses: kubescape/github-action@main
       with:
-        account: ${{secrets.KUBESCAPE_ACCOUNT}}
-        accessKey: ${{secrets.KUBESCAPE_ACCESS_KEY}}
-        server: ${{ vars.KUBESCAPE_SERVER }}
-        files: ${{ steps.changed-files.outputs.all_changed_files }}
+        files: .
         fixFiles: true
         format: "sarif"
+    - name: Save scan results
+      if: always()
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      with:
+        name: kubescape-pr-results
+        path: |
+          results.sarif
+          results.json
+        if-no-files-found: error
+
+  publish-reviews:
+    needs: kubescape-fix-pr-reviews
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+        persist-credentials: false
+    - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      with:
+        name: kubescape-pr-results
     - name: PR Suggester according to SARIF file
-      if: github.event_name == 'pull_request_target'
       uses: HollowMan6/sarif4reviewdog@v1.0.0
       with:
         file: 'results.sarif'
         level: warning
 ```
 
-The above workflow works by collecting the [SARIF (Static Analysis Results Interchange Format)](https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=sarif) file that kubescape generates. Then, with the help of [HollowMan6/sarif4reviewdog](https://github.com/marketplace/actions/sarif-support-for-reviewdog), convert the SARIF file into [RDFormat (Reviewdog Diagnostic Format)](https://github.com/reviewdog/reviewdog/tree/master/proto/rdf) and generate reviews using [Reviewdog](https://github.com/reviewdog/reviewdog).
+The scan job runs on `pull_request` with read-only permissions and no repository secrets. It scans the workspace and saves SARIF and JSON results as a downloadable artifact. A separate job uses Reviewdog to post reviews only for pull requests from branches in the same repository. Fork pull requests receive scan artifacts; they do not run the posting job. Do not enable unsafe fork checkout under `pull_request_target`.
 
 You can also make Kubescape automatically suggest fixes for the pushes to your main branch by opening new PRs with the following workflow:
 
@@ -188,7 +202,7 @@ jobs:
 
 | Name | Description | Required |
 | --- | --- | ---|
-| files | YAML files or Helm charts to scan for misconfigurations. The files need to be provided with the complete path from the root of the repository. | No (default is `.` which scans the whole repository) |
+| files | YAML files or Helm charts to scan, using paths or glob patterns relative to the repository root, separated by whitespace. A single existing path may contain spaces. Shell expressions and quoted shell-style path lists are not supported. | No (default is `.` which scans the whole repository) |
 | outputFile | Name of the output file where the scan result will be stored without the extension. | No (default is `results`) |
 | frameworks | Security framework(s) to scan the files against. Multiple frameworks can be specified separated by a comma with no spaces. Example - `nsa,devopsbest`. Run `kubescape list frameworks` in the [Kubescape CLI](https://hub.armo.cloud/docs/installing-kubescape) to get a list of all frameworks. Either frameworks have to be specified or controls. | No |
 | controls | Security control(s) to scan the files against. Multiple controls can be specified separated by a comma with no spaces. Example - `Configured liveness probe,Pods in default namespace`. Run `kubescape list controls` in the [Kubescape CLI](https://hub.armo.cloud/docs/installing-kubescape) to get a list of all controls. You can use either the complete control name or the control ID such as `C-0001` to specify the control you want use. You must specify either the control(s) or the framework(s) you want used in the scan. | No |

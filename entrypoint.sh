@@ -10,6 +10,14 @@ contains() {
 
 set -e
 
+# Expand filename patterns as data, with word splitting disabled. Bash does not
+# execute shell syntax introduced by expanding a variable.
+append_paths() {
+  local IFS=
+  # shellcheck disable=SC2206
+  scan_command+=( $1 )
+}
+
 # Kubescape uses the client name to make a request for checking for updates
 export KS_CLIENT="github_actions"
 
@@ -29,34 +37,38 @@ if [ -z "${INPUT_FRAMEWORKS}" ] && [ -z "${INPUT_CONTROLS}" ] && [ -z "${INPUT_I
   INPUT_FRAMEWORKS="all"
 fi
 
-if [ -n "${INPUT_CONTROLS}" ]; then
-  controls=""
-  set -f
-  IFS=','
-  set -- "${INPUT_CONTROLS}"
-  set +f
-  unset IFS
-  for control in "$@"; do
-    control=$(echo "${control}" | xargs)
-    controls="${controls}\"${control}\","
-  done
-  controls=$(echo "${controls%?}")
+# Split legacy whitespace-separated scopes without evaluating shell syntax.
+scan_command=(kubescape scan)
+if [ -n "${INPUT_IMAGE}" ]; then
+  scan_command+=(image)
+  if [ -n "${INPUT_REGISTRYUSERNAME}" ] && [ -n "${INPUT_REGISTRYPASSWORD}" ]; then
+    scan_command+=("--username=${INPUT_REGISTRYUSERNAME}" "--password=${INPUT_REGISTRYPASSWORD}")
+  fi
+  scan_command+=("${INPUT_IMAGE}")
+else
+  scope=()
+  if [ -n "${INPUT_FRAMEWORKS}" ]; then
+    read -r -a scope <<< "${INPUT_FRAMEWORKS//$'\n'/ }"
+    scan_command+=(framework "${scope[@]}")
+  elif [ -n "${INPUT_CONTROLS}" ]; then
+    scan_command+=(control "${INPUT_CONTROLS}")
+  fi
+  if [ -n "${INPUT_FILES}" ]; then
+    if [ -e "${INPUT_FILES}" ]; then
+      scan_command+=("${INPUT_FILES}")
+    else
+      read -r -a scope <<< "${INPUT_FILES//$'\n'/ }"
+      for path in "${scope[@]}"; do
+        append_paths "$path"
+      done
+    fi
+  else
+    scan_command+=(.)
+  fi
 fi
-
-frameworks_cmd=$([ -n "${INPUT_FRAMEWORKS}" ] && echo "framework ${INPUT_FRAMEWORKS}" || echo "")
-controls_cmd=$([ -n "${INPUT_CONTROLS}" ] && echo control "${controls}" || echo "")
-scan_input=$([ -n "${INPUT_FILES}" ] && echo "${INPUT_FILES}" || echo .)
 output_formats="${INPUT_FORMAT:-pretty-printer}"
-output_file=$([ -n "${INPUT_OUTPUTFILE}" ] && echo "${INPUT_OUTPUTFILE}" || echo "results")
+output_file="${INPUT_OUTPUTFILE:-results}"
 
-verbose=""
-if [ -n "${INPUT_VERBOSE}" ] && [ "${INPUT_VERBOSE}" != "false" ]; then
-  verbose="--verbose"
-fi
-
-exceptions=$([ -n "$INPUT_EXCEPTIONS" ] && echo "--exceptions ${INPUT_EXCEPTIONS}" || echo "")
-controls_config=$([ -n "$INPUT_CONTROLSCONFIG" ] && echo "--controls-config ${INPUT_CONTROLSCONFIG}" || echo "")
-artifacts_opt=""
 if [ -n "${INPUT_ARTIFACTS}" ]; then
   case "${INPUT_ARTIFACTS}" in
     /*)
@@ -82,14 +94,8 @@ if [ -n "${INPUT_ARTIFACTS}" ]; then
       exit 1
       ;;
   esac
-  printf -v artifacts_opt ' --use-artifacts-from %q' "${resolved_artifacts_path}"
+  scan_command+=(--use-artifacts-from "${resolved_artifacts_path}")
 fi
-account_opt=$([ -n "${INPUT_ACCOUNT}" ] && echo --account "${INPUT_ACCOUNT}" || echo "")
-access_key_opt=$([ -n "${INPUT_ACCESSKEY}" ] && echo --access-key "${INPUT_ACCESSKEY}" || echo "")
-server_opt=$([ -n "${INPUT_SERVER}" ] && echo --server "${INPUT_SERVER}" || echo "")
-fail_threshold_opt=$([ -n "${INPUT_FAILEDTHRESHOLD}" ] && echo --fail-threshold "${INPUT_FAILEDTHRESHOLD}" || echo "")
-compliance_threshold_opt=$([ -n "${INPUT_COMPLIANCETHRESHOLD}" ] && echo --compliance-threshold "${INPUT_COMPLIANCETHRESHOLD}" || echo "")
-
 should_fix_files="false"
 if [ "${INPUT_FIXFILES}" = "true" ]; then
   should_fix_files="true"
@@ -98,26 +104,32 @@ if [ "${INPUT_FIXFILES}" = "true" ]; then
   fi
 fi
 
-severity_threshold_opt=""
 if [ -n "${INPUT_SEVERITYTHRESHOLD}" ] && [ "${should_fix_files}" = "false" ]; then
-  severity_threshold_opt="--severity-threshold ${INPUT_SEVERITYTHRESHOLD}"
+  scan_command+=(--severity-threshold "${INPUT_SEVERITYTHRESHOLD}")
 fi
-
-image_subcmd=""
-if [ -n "${INPUT_IMAGE}" ]; then
-  image_arg="${INPUT_IMAGE}"
-  auth_opts=""
-  if [ -n "${INPUT_REGISTRYUSERNAME}" ] && [ -n "${INPUT_REGISTRYPASSWORD}" ]; then
-    auth_opts="--username=${INPUT_REGISTRYUSERNAME} --password=${INPUT_REGISTRYPASSWORD}"
+for option in ACCOUNT ACCESSKEY SERVER FAILEDTHRESHOLD COMPLIANCETHRESHOLD EXCEPTIONS CONTROLSCONFIG; do
+  input="INPUT_${option}"
+  if [ -n "${!input}" ]; then
+    case "$option" in
+      ACCOUNT) flag=--account ;;
+      ACCESSKEY) flag=--access-key ;;
+      SERVER) flag=--server ;;
+      FAILEDTHRESHOLD) flag=--fail-threshold ;;
+      COMPLIANCETHRESHOLD) flag=--compliance-threshold ;;
+      EXCEPTIONS) flag=--exceptions ;;
+      CONTROLSCONFIG) flag=--controls-config ;;
+    esac
+    scan_command+=("$flag" "${!input}")
   fi
-  image_subcmd="image ${auth_opts}"
-  scan_input="${image_arg}"
+done
+scan_command+=(--format "${output_formats}" --output "${output_file}")
+if [ -n "${INPUT_VERBOSE}" ] && [ "${INPUT_VERBOSE}" != "false" ]; then
+  scan_command+=(--verbose)
 fi
 
-scan_command="kubescape scan ${image_subcmd} ${frameworks_cmd} ${controls_cmd} ${scan_input} ${account_opt} ${access_key_opt} ${server_opt} ${fail_threshold_opt} ${compliance_threshold_opt} ${severity_threshold_opt} --format ${output_formats} --output ${output_file} ${verbose} ${exceptions} ${controls_config}${artifacts_opt}"
-
-echo "Running: ${scan_command}"
-eval "${scan_command}"
+# Do not log arguments containing account or registry credentials.
+echo "Running Kubescape scan"
+"${scan_command[@]}"
 
 # Post-processing for SARIF to ensure relative paths and remove results with empty URIs
 if contains "${output_formats}" "sarif"; then
