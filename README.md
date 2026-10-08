@@ -42,45 +42,65 @@ You can then see the results in the Pull Request that triggered the scan and the
 
 ### Automatically Suggest Fixes
 
-To make Kubescape automatically suggest fixes to your pull requests by code review, use the following workflow:
+To scan pull requests and suggest fixes on branches in the same repository, use the following workflow:
 
 ```yaml
 name: Suggest autofixes with Kubescape for PR by reviews
 on:
-  pull_request_target:
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   kubescape-fix-pr-reviews:
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 0
-        ref: ${{github.event.pull_request.head.ref}}
-        repository: ${{github.event.pull_request.head.repo.full_name}}
-    - name: Get changed files
-      id: changed-files
-      uses: tj-actions/changed-files@v35
+        ref: ${{ github.event.pull_request.head.sha }}
+        persist-credentials: false
+    # Scan the workspace rather than interpolating changed filenames into inputs.
+    # Fork contents are analyzed without repository secrets or write permissions.
     - uses: kubescape/github-action@main
       with:
-        account: ${{secrets.KUBESCAPE_ACCOUNT}}
-        accessKey: ${{secrets.KUBESCAPE_ACCESS_KEY}}
-        server: ${{ vars.KUBESCAPE_SERVER }}
-        files: ${{ steps.changed-files.outputs.all_changed_files }}
+        files: .
         fixFiles: true
         format: "sarif"
+    - name: Save scan results
+      if: always()
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      with:
+        name: kubescape-pr-results
+        path: |
+          results.sarif
+          results.json
+        if-no-files-found: error
+
+  publish-reviews:
+    needs: kubescape-fix-pr-reviews
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+        persist-credentials: false
+    - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      with:
+        name: kubescape-pr-results
     - name: PR Suggester according to SARIF file
-      if: github.event_name == 'pull_request_target'
       uses: HollowMan6/sarif4reviewdog@v1.0.0
       with:
         file: 'results.sarif'
         level: warning
 ```
 
-The above workflow works by collecting the [SARIF (Static Analysis Results Interchange Format)](https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=sarif) file that kubescape generates. Then, with the help of [HollowMan6/sarif4reviewdog](https://github.com/marketplace/actions/sarif-support-for-reviewdog), convert the SARIF file into [RDFormat (Reviewdog Diagnostic Format)](https://github.com/reviewdog/reviewdog/tree/master/proto/rdf) and generate reviews using [Reviewdog](https://github.com/reviewdog/reviewdog).
+The scan job runs on `pull_request` with read-only permissions and no repository secrets. It scans the workspace and saves SARIF and JSON results as a downloadable artifact. A separate job uses Reviewdog to post reviews only for pull requests from branches in the same repository. Fork pull requests receive scan artifacts; they do not run the posting job. Do not enable unsafe fork checkout under `pull_request_target`.
 
 You can also make Kubescape automatically suggest fixes for the pushes to your main branch by opening new PRs with the following workflow:
 
@@ -182,7 +202,7 @@ jobs:
 
 | Name | Description | Required |
 | --- | --- | ---|
-| files | YAML files or Helm charts to scan for misconfigurations. The files need to be provided with the complete path from the root of the repository. | No (default is `.` which scans the whole repository) |
+| files | YAML files or Helm charts to scan, using paths or glob patterns relative to the repository root, separated by whitespace. A single existing path may contain spaces. Shell expressions and quoted shell-style path lists are not supported. | No (default is `.` which scans the whole repository) |
 | outputFile | Name of the output file where the scan result will be stored without the extension. | No (default is `results`) |
 | format | Output format of the scan results. Can take one or more formats separated by a comma with no spaces. Example - `sarif,json`. When multiple formats are specified, Kubescape produces one file per format using the `outputFile` name, e.g. `results.sarif` and `results.json`. Run `kubescape scan -h` in the [Kubescape CLI](https://hub.armo.cloud/docs/installing-kubescape) to get a list of all supported formats. | No (default is `junit`) |
 | frameworks | Security framework(s) to scan the files against. Multiple frameworks can be specified separated by a comma with no spaces. Example - `nsa,devopsbest`. Run `kubescape list frameworks` in the [Kubescape CLI](https://hub.armo.cloud/docs/installing-kubescape) to get a list of all frameworks. Either frameworks have to be specified or controls. | No |
@@ -195,6 +215,7 @@ jobs:
 | verbose | Display all of the input resources and not only failed resources. Default is off | No |
 | exceptions | The JSON file containing at least one resource and one policy. Refer [exceptions](https://hub.armo.cloud/docs/exceptions) docs for more info. Objects with exceptions will be presented as exclude and not fail. | No |
 | controlsConfig | The file containing controls configuration. Use `kubescape download controls-inputs` to download the configured controls-inputs. | No |
+| artifacts | Workspace-relative path to a vendored Kubescape artifacts directory. The directory must resolve inside the workspace and cannot be used with `image`. | No |
 | image | The image you wish to scan. Launches an image scan, which cannot run together with configuration scans. | No |
 | registryUsername | Username to a private registry that hosts the scanned image. | No |
 | registryPassword | Password to a private registry that hosts the scanned image. | No |
@@ -202,7 +223,33 @@ jobs:
 
 ## Examples
 
-> **Note:** The `version` input defaults to `latest`, so it is omitted from the examples below. For reproducible scans, pin a specific Kubescape release with e.g. `version: v3.0.21`.
+> **Note:** The `version` input defaults to `latest`, but pinning a Kubescape version alone does not pin the policy library used by a scan. Use a reviewed artifact bundle as described below when policy stability is required.
+
+### Reproducible policy evaluation
+
+Create the artifacts outside the CI run, review them, and commit the directory alongside the manifests that will be scanned:
+
+```bash
+kubescape download artifacts --output kubescape-artifacts
+```
+
+Then pin the action commit and Kubescape version, and scan a path that does not contain the artifact JSON files:
+
+```yaml
+- uses: actions/checkout@v3
+- uses: kubescape/github-action@<full-commit-sha>
+  with:
+    version: v4.0.13
+    frameworks: nsa
+    files: manifests/
+    artifacts: kubescape-artifacts/
+```
+
+The `artifacts` path must be relative to the checked-out workspace and must resolve inside it. Downloading the bundle during every CI run would fetch the current policy library again and defeat policy reproducibility.
+
+The bundle includes `exceptions.json` and `controls-inputs.json`. Kubescape v4.0.13 prefers explicit `exceptions` and `controlsConfig` inputs when they are supplied together with `artifacts`; older versions such as v3.0.21 prefer the files in the artifact bundle. When `account`, `accessKey`, or `server` are also supplied, they are still forwarded, but the vendored artifacts remain the policy source. Ensure that any required custom policies are present in the bundle.
+
+Pinning the action commit, Kubescape version, scanned manifests, and reviewed artifact bundle makes policy and rule evaluation reproducible. It does not make the entire container build reproducible because the action currently retrieves Kubescape's installer separately.
 
 #### Scan and submit results to the [Kubescape Cloud](https://cloud.armosec.io/)
 
@@ -345,4 +392,3 @@ jobs:
         with:
           sarif_file: results.sarif
 ```
-

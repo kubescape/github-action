@@ -20,7 +20,9 @@ inputs:
     default: high
   files:
     description: |
-      Path to the configuration yaml to scan
+      Configuration paths or glob patterns to scan, separated by whitespace.
+      A single existing path may contain spaces. Shell expressions are not
+      evaluated; quoted shell-style path lists are not supported.
     required: false
   outputFile:
     description: |
@@ -50,6 +52,11 @@ inputs:
   controlsConfig:
     description: |
       Path to the file containing controls configuration.
+    required: false
+  artifacts:
+    description: |
+      Workspace-relative path to a vendored Kubescape artifacts directory.
+      The directory is used as the policy source for configuration scans.
     required: false
   account:
     description: |
@@ -122,45 +129,81 @@ runs:
   steps:
     - id: resolve_version
       shell: bash
+      env:
+        INPUT_VERSION: ${{ inputs.version }}
+        GH_TOKEN: ${{ github.token }}
       run: |
-        VERSION="${{ inputs.version }}"
-        if [ "$VERSION" = "latest" ]; then
-          VERSION=$(curl -s -H "Authorization: Bearer ${{ github.token }}" https://api.github.com/repos/kubescape/kubescape/releases/latest | jq -r .tag_name)
+        VERSION="$INPUT_VERSION"
+        if [[ ! "$VERSION" =~ ^(latest|v[0-9]+\.[0-9]+\.[0-9]+([.-][A-Za-z0-9.-]+)?)$ ]]; then
+          echo "Invalid Kubescape version" >&2
+          exit 1
         fi
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        if [ "$VERSION" = "latest" ]; then
+          VERSION=$(curl -fsS -H "Authorization: Bearer $GH_TOKEN" https://api.github.com/repos/kubescape/kubescape/releases/latest | jq -r .tag_name)
+        fi
+        if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.-][A-Za-z0-9.-]+)?$ ]]; then
+          echo "Invalid resolved Kubescape version" >&2
+          exit 1
+        fi
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
     - name: Build Kubescape container
       shell: bash
+      env:
+        KUBESCAPE_VERSION: ${{ steps.resolve_version.outputs.version }}
+        ACTION_PATH: ${{ github.action_path }}
       run: |
-        docker build -t kubescape-action:${{ steps.resolve_version.outputs.version }} \
-          --build-arg KUBESCAPE_VERSION=${{ steps.resolve_version.outputs.version }} \
-          ${{ github.action_path }}
+        docker build -t "kubescape-action:$KUBESCAPE_VERSION" \
+          --build-arg "KUBESCAPE_VERSION=$KUBESCAPE_VERSION" \
+          "$ACTION_PATH"
     - name: Run Kubescape scan
       shell: bash
+      env:
+        INPUT_FAILEDTHRESHOLD: ${{ inputs.failedThreshold }}
+        INPUT_COMPLIANCETHRESHOLD: ${{ inputs.complianceThreshold }}
+        INPUT_SEVERITYTHRESHOLD: ${{ inputs.severityThreshold }}
+        INPUT_FILES: ${{ inputs.files }}
+        INPUT_OUTPUTFILE: ${{ inputs.outputFile }}
+        INPUT_VERBOSE: ${{ inputs.verbose }}
+        INPUT_FRAMEWORKS: ${{ inputs.frameworks }}
+        INPUT_CONTROLS: ${{ inputs.controls }}
+        INPUT_CONTROLSCONFIG: ${{ inputs.controlsConfig }}
+        INPUT_ACCOUNT: ${{ inputs.account }}
+        INPUT_ACCESSKEY: ${{ inputs.accessKey }}
+        INPUT_SERVER: ${{ inputs.server }}
+        INPUT_EXCEPTIONS: ${{ inputs.exceptions }}
+        INPUT_FORMAT: ${{ inputs.format }}
+        INPUT_FIXFILES: ${{ inputs.fixFiles }}
+        INPUT_IMAGE: ${{ inputs.image }}
+        INPUT_REGISTRYUSERNAME: ${{ inputs.registryUsername }}
+        INPUT_REGISTRYPASSWORD: ${{ inputs.registryPassword }}
+        INPUT_ARTIFACTS: ${{ inputs.artifacts }}
+        KUBESCAPE_VERSION: ${{ steps.resolve_version.outputs.version }}
       run: |
         docker run --rm \
           -e GITHUB_ACTIONS=true \
           -e GITHUB_WORKSPACE=/github/workspace \
-          -e GITHUB_REPOSITORY=${{ github.repository }} \
-          -e GITHUB_REF=${{ github.ref }} \
-          -e GITHUB_SHA=${{ github.sha }} \
-          -v ${{ github.workspace }}:/github/workspace \
+          -e GITHUB_REPOSITORY \
+          -e GITHUB_REF \
+          -e GITHUB_SHA \
+          -v "$GITHUB_WORKSPACE:/github/workspace" \
           -w /github/workspace \
-          -e INPUT_FAILEDTHRESHOLD="${{ inputs.failedThreshold }}" \
-          -e INPUT_COMPLIANCETHRESHOLD="${{ inputs.complianceThreshold }}" \
-          -e INPUT_SEVERITYTHRESHOLD="${{ inputs.severityThreshold }}" \
-          -e INPUT_FILES="${{ inputs.files }}" \
-          -e INPUT_OUTPUTFILE="${{ inputs.outputFile }}" \
-          -e INPUT_VERBOSE="${{ inputs.verbose }}" \
-          -e INPUT_FRAMEWORKS="${{ inputs.frameworks }}" \
-          -e INPUT_CONTROLS="${{ inputs.controls }}" \
-          -e INPUT_CONTROLSCONFIG="${{ inputs.controlsConfig }}" \
-          -e INPUT_ACCOUNT="${{ inputs.account }}" \
-          -e INPUT_ACCESSKEY="${{ inputs.accessKey }}" \
-          -e INPUT_SERVER="${{ inputs.server }}" \
-          -e INPUT_EXCEPTIONS="${{ inputs.exceptions }}" \
-          -e INPUT_FORMAT="${{ inputs.format }}" \
-          -e INPUT_FIXFILES="${{ inputs.fixFiles }}" \
-          -e INPUT_IMAGE="${{ inputs.image }}" \
-          -e INPUT_REGISTRYUSERNAME="${{ inputs.registryUsername }}" \
-          -e INPUT_REGISTRYPASSWORD="${{ inputs.registryPassword }}" \
-          kubescape-action:${{ steps.resolve_version.outputs.version }}
+          -e INPUT_FAILEDTHRESHOLD="$INPUT_FAILEDTHRESHOLD" \
+          -e INPUT_COMPLIANCETHRESHOLD="$INPUT_COMPLIANCETHRESHOLD" \
+          -e INPUT_SEVERITYTHRESHOLD="$INPUT_SEVERITYTHRESHOLD" \
+          -e INPUT_FILES="$INPUT_FILES" \
+          -e INPUT_OUTPUTFILE="$INPUT_OUTPUTFILE" \
+          -e INPUT_VERBOSE="$INPUT_VERBOSE" \
+          -e INPUT_FRAMEWORKS="$INPUT_FRAMEWORKS" \
+          -e INPUT_CONTROLS="$INPUT_CONTROLS" \
+          -e INPUT_CONTROLSCONFIG="$INPUT_CONTROLSCONFIG" \
+          -e INPUT_ARTIFACTS="$INPUT_ARTIFACTS" \
+          -e INPUT_ACCOUNT="$INPUT_ACCOUNT" \
+          -e INPUT_ACCESSKEY="$INPUT_ACCESSKEY" \
+          -e INPUT_SERVER="$INPUT_SERVER" \
+          -e INPUT_EXCEPTIONS="$INPUT_EXCEPTIONS" \
+          -e INPUT_FORMAT="$INPUT_FORMAT" \
+          -e INPUT_FIXFILES="$INPUT_FIXFILES" \
+          -e INPUT_IMAGE="$INPUT_IMAGE" \
+          -e INPUT_REGISTRYUSERNAME="$INPUT_REGISTRYUSERNAME" \
+          -e INPUT_REGISTRYPASSWORD="$INPUT_REGISTRYPASSWORD" \
+          "kubescape-action:$KUBESCAPE_VERSION"
