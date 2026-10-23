@@ -32,7 +32,7 @@ jobs:
         # # Optional: Scan a specific path. Default will scan the whole repository
         # files: "examples/*.yaml"
     - name: Upload Kubescape scan results to Github Code Scanning
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
       with:
         sarif_file: results.sarif
 ```
@@ -193,7 +193,7 @@ jobs:
         # accessKey: ${{secrets.KUBESCAPE_ACCESS_KEY}}
         # server: ${{ vars.KUBESCAPE_SERVER }}
     - name: Upload Kubescape scan results to Github Code Scanning
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
       with:
         sarif_file: results.sarif
 ```
@@ -275,7 +275,7 @@ jobs:
         accessKey: ${{secrets.KUBESCAPE_ACCESS_KEY}}
         server: ${{ vars.KUBESCAPE_SERVER }}
     - name: Upload Kubescape scan results to Github Code Scanning
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
       with:
         sarif_file: results.sarif
 ```
@@ -304,7 +304,7 @@ jobs:
         # Scan a specific path. Default will scan the whole repository
         files: "examples/kubernetes-manifests/*.yaml"
     - name: Upload Kubescape scan results to Github Code Scanning
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
       with:
         sarif_file: results.sarif
 ```
@@ -333,7 +333,7 @@ jobs:
           frameworks: |
             nsa,mitre
       - name: Upload Kubescape scan results to Github Code Scanning
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
           sarif_file: results.sarif
 ```
@@ -361,7 +361,7 @@ jobs:
           outputFile: results
           failedThreshold: 50
       - name: Upload Kubescape scan results to Github Code Scanning
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
           sarif_file: results.sarif
 ```
@@ -388,7 +388,7 @@ jobs:
           outputFile: results
           severityThreshold: medium
       - name: Upload Kubescape scan results to Github Code Scanning
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
           sarif_file: results.sarif
 ```
