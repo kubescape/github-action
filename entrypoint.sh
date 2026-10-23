@@ -129,10 +129,11 @@ fi
 
 # Do not log arguments containing account or registry credentials.
 echo "Running Kubescape scan"
-"${scan_command[@]}"
+scan_status=0
+"${scan_command[@]}" || scan_status=$?
 
-# Post-processing for SARIF to ensure relative paths and remove results with empty URIs
-if contains "${output_formats}" "sarif"; then
+# Use a subshell so its temporary-file cleanup cannot affect the caller's traps.
+normalize_sarif() (
   actual_sarif="${output_file}"
   if [ ! -f "${actual_sarif}" ] && [ -f "${output_file}.sarif" ]; then
     actual_sarif="${output_file}.sarif"
@@ -140,10 +141,13 @@ if contains "${output_formats}" "sarif"; then
   
   if [ -f "${actual_sarif}" ]; then
     echo "Normalizing paths and filtering invalid results in ${actual_sarif}..."
+    # mktemp keeps report contents private regardless of the caller's umask.
+    sarif_temp=$(mktemp -- "${actual_sarif}.XXXXXX") || exit 1
+    trap 'rm -f -- "${sarif_temp}"' EXIT
     
     # 1. Clean up URIs
     # 2. Filter out results that have an empty URI (which GitHub rejects)
-    jq '
+    if ! jq -e '
       walk(if type == "object" and has("uri") and (.uri | type == "string") then 
         .uri |= sub("^file:///github/workspace/"; "") | 
         .uri |= sub("^/github/workspace/"; "") | 
@@ -155,21 +159,44 @@ if contains "${output_formats}" "sarif"; then
         .locations[0].physicalLocation.artifactLocation.uri != "" and 
         .locations[0].physicalLocation.artifactLocation.uri != null
       ))
-    ' "${actual_sarif}" > "${actual_sarif}.tmp" && mv "${actual_sarif}.tmp" "${actual_sarif}"
+    ' -- "${actual_sarif}" > "${sarif_temp}"; then
+      echo "Failed to normalize SARIF file ${actual_sarif}" >&2
+      exit 1
+    fi
+    mv -f -- "${sarif_temp}" "${actual_sarif}" || exit 1
     
     echo "Processing complete. Final URI list:"
-    jq -r '.runs[].results[].locations[0].physicalLocation.artifactLocation.uri' "${actual_sarif}" | head -n 20
+    jq -r '.runs[].results[].locations[0].physicalLocation.artifactLocation.uri' -- "${actual_sarif}" | head -n 20
   else
-    echo "Warning: SARIF file ${output_file} not found."
+    echo "SARIF file ${output_file} not found." >&2
+    exit 1
   fi
+)
+
+# Threshold failures may still produce useful reports. Finalize them before
+# returning the scanner's status, without turning a failed scan into success.
+finalization_status=0
+if contains "${output_formats}" "sarif"; then
+  normalize_sarif || finalization_status=$?
 fi
 
-if [ "$should_fix_files" = "true" ]; then
+if contains "${output_formats}" "json"; then
   json_file="${output_file}"
   if [ ! -f "${json_file}" ] && [ -f "${output_file}.json" ]; then
     json_file="${output_file}.json"
   fi
-  if [ -f "${json_file}" ]; then
-    kubescape fix --no-confirm "${json_file}"
+  if [ ! -f "${json_file}" ]; then
+    echo "JSON file ${output_file} not found." >&2
+    finalization_status=1
   fi
+fi
+
+if [ "${scan_status}" -ne 0 ]; then
+  exit "${scan_status}"
+fi
+if [ "${finalization_status}" -ne 0 ]; then
+  exit "${finalization_status}"
+fi
+if [ "$should_fix_files" = "true" ]; then
+  kubescape fix --no-confirm "${json_file}"
 fi

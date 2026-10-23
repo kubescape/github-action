@@ -19,3 +19,7 @@ jobs:
         run: bash tests/entrypoint_test.sh
       - name: Run action command-construction tests
         run: bash tests/action_test.sh
+      - name: Run report finalization tests
+        run: bash tests/report_test.sh
+      - name: Run container report-access tests
+        run: bash tests/report-container_test.sh
