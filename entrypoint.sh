@@ -149,7 +149,7 @@ if contains "${output_formats}" "sarif"; then
         .uri |= sub("^/github/workspace/"; "") | 
         .uri |= sub("^file://"; "") |
         .uri |= sub("^/"; "") |
-        .uri |= sub("^./"; "") 
+        .uri |= sub("^\\./"; "")
       else . end) |
       .runs[].results |= map(select(
         .locations[0].physicalLocation.artifactLocation.uri != "" and 

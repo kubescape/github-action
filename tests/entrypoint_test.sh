@@ -30,12 +30,16 @@ new_case() {
   cat > "${bin_dir}/kubescape" <<'STUB'
 #!/bin/bash
 printf '%s\n' "$@" > "${KUBESCAPE_ARGS_FILE}"
+if [ -n "${KUBESCAPE_SARIF_FIXTURE:-}" ]; then
+  cp "${KUBESCAPE_SARIF_FIXTURE}" results.sarif
+fi
 STUB
   chmod +x "${bin_dir}/kubescape"
 
   unset INPUT_ACCESSKEY INPUT_ACCOUNT INPUT_ARTIFACTS INPUT_CONTROLSCONFIG
   unset INPUT_EXCEPTIONS INPUT_IMAGE INPUT_SERVER INPUT_FILES
   unset INPUT_FRAMEWORKS INPUT_CONTROLS INPUT_REGISTRYUSERNAME INPUT_REGISTRYPASSWORD
+  unset INPUT_FORMAT KUBESCAPE_SARIF_FIXTURE
 }
 
 run_entrypoint() {
@@ -43,6 +47,7 @@ run_entrypoint() {
     cd "${workspace}" || exit 1
     PATH="${bin_dir}:${PATH}" \
       KUBESCAPE_ARGS_FILE="${args_file}" \
+      KUBESCAPE_SARIF_FIXTURE="${KUBESCAPE_SARIF_FIXTURE:-}" \
       INPUT_ACCESSKEY="${INPUT_ACCESSKEY:-}" \
       INPUT_ACCOUNT="${INPUT_ACCOUNT:-}" \
       INPUT_ARTIFACTS="${INPUT_ARTIFACTS:-}" \
@@ -53,7 +58,7 @@ run_entrypoint() {
       INPUT_FAILEDTHRESHOLD="" \
       INPUT_FILES="${INPUT_FILES:-manifests}" \
       INPUT_FIXFILES="false" \
-      INPUT_FORMAT="pretty-printer" \
+      INPUT_FORMAT="${INPUT_FORMAT:-pretty-printer}" \
       INPUT_FRAMEWORKS="${INPUT_FRAMEWORKS-nsa}" \
       INPUT_IMAGE="${INPUT_IMAGE:-}" \
       INPUT_OUTPUTFILE="results" \
@@ -321,6 +326,32 @@ test_globs_and_multiline_scopes() {
   fi
 }
 
+test_sarif_preserves_relative_directories() {
+  new_case sarif_paths
+  INPUT_FORMAT=sarif
+  KUBESCAPE_SARIF_FIXTURE="${case_root}/input.sarif"
+  jq -n '
+    {runs: [{results: ([
+      "k/pod.yaml",
+      "manifests/pod.yaml",
+      "./k/pod.yaml",
+      "/github/workspace/k/pod.yaml",
+      "file:///github/workspace/k/pod.yaml",
+      ""
+    ] | map({locations: [{physicalLocation: {artifactLocation: {uri: .}}}]}))}]}
+  ' > "${KUBESCAPE_SARIF_FIXTURE}"
+
+  if run_entrypoint && jq -e '
+    [.runs[].results[].locations[0].physicalLocation.artifactLocation.uri] ==
+      ["k/pod.yaml", "manifests/pod.yaml", "k/pod.yaml", "k/pod.yaml", "k/pod.yaml"]
+  ' "${workspace}/results.sarif" > /dev/null; then
+    pass "SARIF normalization preserves directories and removes only literal prefixes"
+  else
+    fail "SARIF normalization preserves directories and removes only literal prefixes"
+  fi
+}
+
+test_sarif_preserves_relative_directories
 test_globs_and_multiline_scopes
 test_scan_scopes
 test_credentials_cannot_inject_commands
