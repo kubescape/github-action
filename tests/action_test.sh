@@ -88,6 +88,14 @@ else
   fail "composite action keeps inputs data-only"
 fi
 
+if grep -Fxq -- '--user' "${args_file}" &&
+  grep -Fxq -- "$(id -u):$(id -g)" "${args_file}" &&
+  grep -Fxq -- 'HOME=/tmp' "${args_file}"; then
+  pass "container uses the runner identity with a writable home"
+else
+  fail "container uses the runner identity with a writable home"
+fi
+
 # Version input must not introduce shell code or container tag syntax.
 version_script="${test_root}/version.sh"
 awk '
