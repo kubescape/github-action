@@ -96,6 +96,47 @@ else
   fail "container uses the runner identity with a writable home"
 fi
 
+# All report-producing CI examples must exercise the checkout under test rather
+# than a separately downloaded upstream action that may not contain the fix.
+for workflow in example-scan.yaml example-scan-image.yaml example-fix-pr-review.yaml; do
+  workflow_file="${repo_root}/.github/workflows/${workflow}"
+  if grep -Eq '^    - uses: \./$' "$workflow_file" &&
+    ! grep -Eq '^    - uses: kubescape/github-action@' "$workflow_file"; then
+    pass "${workflow} scans with the checked-out action"
+  else
+    fail "${workflow} scans with the checked-out action"
+  fi
+done
+
+# Exercise the container test's default Docker route without a daemon. The fake
+# runtime stops the first run deliberately; reaching it proves that the inner
+# Docker shim delegates instead of resolving itself again through PATH.
+probe_bin="${test_root}/runtime-probe/bin"
+probe_args="${test_root}/runtime-probe/args"
+mkdir -p "$probe_bin"
+cat > "${probe_bin}/docker" <<'PROBE'
+#!/bin/bash
+if [ "$1" = run ]; then
+  printf '%s\n' "$@" > "$PROBE_ARGS_FILE"
+  exit 88
+fi
+exit 0
+PROBE
+chmod +x "${probe_bin}/docker"
+probe_status=0
+timeout 5s env -u CONTAINER_RUNTIME \
+  PATH="${probe_bin}:${PATH}" PROBE_ARGS_FILE="$probe_args" \
+  bash "${repo_root}/tests/report-container_test.sh" \
+  > "${test_root}/runtime-probe/log" 2>&1 || probe_status=$?
+if [ "$probe_status" -eq 1 ] && [ -f "$probe_args" ] &&
+  [ "$(grep -Fxc -- run "$probe_args")" -eq 1 ] &&
+  grep -Fxq -- 'TEST_UMASK=0022' "$probe_args" &&
+  grep -Fxq -- 'INPUT_OUTPUTFILE=reports with spaces/nested/results' "$probe_args"; then
+  pass "default Docker container test reaches the configured runtime once"
+else
+  fail "default Docker container test reaches the configured runtime once"
+fi
+
 # Version input must not introduce shell code or container tag syntax.
 version_script="${test_root}/version.sh"
 awk '

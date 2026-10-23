@@ -6,14 +6,16 @@
 set -euo pipefail
 repo_root=${REPO_UNDER_TEST:-$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd -P)}
 runtime=${CONTAINER_RUNTIME:-docker}
+# Resolve before the scan subshell shadows docker on PATH with its test shim.
+runtime_bin=$(command -v "$runtime")
 test_root=$(mktemp -d)
 image=
 cleanup() {
   if [ -n "$image" ]; then
-    "$runtime" image rm "$image" > /dev/null 2>&1 || true
+    "$runtime_bin" image rm "$image" > /dev/null 2>&1 || true
   fi
   if [ "$runtime" = podman ]; then
-    podman unshare rm -rf -- "$test_root"
+    "$runtime_bin" unshare rm -rf -- "$test_root"
   else
     rm -rf -- "$test_root"
   fi
@@ -59,7 +61,7 @@ chmod 600 "${output}.sarif" "${output}.json"
 SCANNER
 chmod +x "${test_root}/context/kubescape"
 image="kubescape-action:report-test-$$"
-"$runtime" build -q -t "$image" "${test_root}/context"
+"$runtime_bin" build -q -t "$image" "${test_root}/context"
 
 awk '
   /^    - name: Run Kubescape scan$/ { in_step=1; next }
@@ -75,10 +77,10 @@ cat > "${test_root}/bin/docker" <<'RUNTIME'
 command=$1
 shift
 if [ "$CONTAINER_RUNTIME" = podman ]; then
-  exec podman "$command" --security-opt label=disable --userns=keep-id --user 0:0 \
+  exec "$CONTAINER_RUNTIME_BIN" "$command" --security-opt label=disable --userns=keep-id --user 0:0 \
     -e "TEST_UMASK=$TEST_UMASK" "$@"
 fi
-exec "$CONTAINER_RUNTIME" "$command" -e "TEST_UMASK=$TEST_UMASK" "$@"
+exec "$CONTAINER_RUNTIME_BIN" "$command" -e "TEST_UMASK=$TEST_UMASK" "$@"
 RUNTIME
 chmod +x "${test_root}/bin/docker"
 
@@ -94,6 +96,7 @@ for threshold in critical high autofix; do
     status=0
     (
       export CONTAINER_RUNTIME=$runtime PATH="${test_root}/bin:${PATH}"
+      export CONTAINER_RUNTIME_BIN=$runtime_bin
       export TEST_UMASK=$mask
       export GITHUB_WORKSPACE=$workspace KUBESCAPE_VERSION="report-test-$$"
       export INPUT_ACCOUNT='' INPUT_ACCESSKEY='' INPUT_SERVER='' INPUT_FAILEDTHRESHOLD=''
