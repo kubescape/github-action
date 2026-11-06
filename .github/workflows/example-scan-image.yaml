@@ -9,7 +9,8 @@ jobs:
       security-events: write
     steps:
     - uses: actions/checkout@v3
-    - uses: kubescape/github-action@main
+    # Exercise this checkout's action implementation in repository CI.
+    - uses: ./
       continue-on-error: true
       with:
         image: quay.io/kubescape/kubescape:v3.0.3

@@ -16,7 +16,8 @@ jobs:
         persist-credentials: false
     # Scan the workspace rather than interpolating changed filenames into inputs.
     # Fork contents are analyzed without repository secrets or write permissions.
-    - uses: kubescape/github-action@main
+    # Exercise this checkout's action implementation in repository CI.
+    - uses: ./
       with:
         files: .
         fixFiles: true

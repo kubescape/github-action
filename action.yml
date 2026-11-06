@@ -179,7 +179,11 @@ runs:
         INPUT_ARTIFACTS: ${{ inputs.artifacts }}
         KUBESCAPE_VERSION: ${{ steps.resolve_version.outputs.version }}
       run: |
+        # Reports stay owner-only; create them as the runner that consumes them.
+        # Numeric users need a writable HOME even without an /etc/passwd entry.
         docker run --rm \
+          --user "$(id -u):$(id -g)" \
+          -e HOME=/tmp \
           -e GITHUB_ACTIONS=true \
           -e GITHUB_WORKSPACE=/github/workspace \
           -e GITHUB_REPOSITORY \
