@@ -99,7 +99,7 @@ fi
 should_fix_files="false"
 if [ "${INPUT_FIXFILES}" = "true" ]; then
   should_fix_files="true"
-  if ! contains "${output_formats}" "json"; then
+  if ! contains ",${output_formats}," ",json,"; then
     output_formats="${output_formats},json"
   fi
 fi
@@ -180,7 +180,7 @@ if contains "${output_formats}" "sarif"; then
   normalize_sarif || finalization_status=$?
 fi
 
-if contains "${output_formats}" "json"; then
+if contains ",${output_formats}," ",json,"; then
   json_file="${output_file}"
   if [ ! -f "${json_file}" ] && [ -f "${output_file}.json" ]; then
     json_file="${output_file}.json"

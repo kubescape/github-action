@@ -51,9 +51,17 @@ if [ "${REPORT_BEHAVIOR:-valid}" != missing ]; then
       : > "${output}.sarif"
     fi
   fi
-  if [[ "$formats" == *json* ]]; then
+  if [[ ",$formats," == *,json,* ]]; then
     printf '%s\n' '{}' > "${output}.json"
     chmod 600 -- "${output}.json"
+  fi
+  if [[ ",$formats," == *,cyclonedx-json,* ]]; then
+    printf '%s\n' '{}' > "${output}.cdx.json"
+    chmod 600 -- "${output}.cdx.json"
+  fi
+  if [[ ",$formats," == *,spdx-json,* ]]; then
+    printf '%s\n' '{}' > "${output}.spdx.json"
+    chmod 600 -- "${output}.spdx.json"
   fi
 fi
 exit "${SCANNER_EXIT:-0}"
@@ -109,6 +117,12 @@ check "failure without a report preserves the scanner status" test "$status" -eq
 run_case json_only 0 valid json
 check "JSON-only scan stays successful and private" test \
   "$status:$(stat -c %a "${workspace}/results.json")" = 0:600
+run_case cyclonedx_json_only 0 valid cyclonedx-json
+check "cyclonedx-json scan does not require standalone results.json" test \
+  "$status:$(stat -c %a "${workspace}/results.cdx.json")" = 0:600
+run_case spdx_json_only 0 valid spdx-json
+check "spdx-json scan does not require standalone results.json" test \
+  "$status:$(stat -c %a "${workspace}/results.spdx.json")" = 0:600
 run_case missing_json 0 missing json
 check "missing requested JSON fails an otherwise successful scan" test "$status" -ne 0
 
@@ -127,6 +141,9 @@ run_case autofix 0 valid sarif results 0022 true
 check "autofix still succeeds and requests JSON automatically" test "$status" -eq 0
 check "autofix receives the generated report" grep -Fxq 'results.json' "${workspace}/fix-args"
 check "autofix JSON stays private" test "$(stat -c %a "${workspace}/results.json")" = 600
+run_case autofix_cyclonedx 0 valid cyclonedx-json results 0022 true
+check "autofix with cyclonedx-json also requests standalone JSON" test "$status" -eq 0
+check "autofix with cyclonedx-json receives results.json" grep -Fxq 'results.json' "${workspace}/fix-args"
 run_case failed_autofix 0 valid sarif results 0022 true 6
 check "autofix errors are not swallowed" test "$status" -eq 6
 run_case failed_scan_with_autofix 3 valid sarif results 0022 true
